@@ -1,0 +1,17 @@
+frontend/.next/
+frontend/node_modules/
+backend/.venv/
+backend/__pycache__/
+backend/.pytest_cache/
+backend/chroma/
+backend/storage/
+backend/.env
+*.pyc
+*.db
+*.sqlite3
+dist/
+coverage/
+datasets/brain-tumor-mri/
+artifacts/models/
+artifacts/logs/
+frontend/frontend-dev.log
