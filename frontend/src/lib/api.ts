@@ -1,6 +1,8 @@
 import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
+const baseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  (process.env.NODE_ENV === "production" ? "/api" : "http://localhost:8000/api");
 
 export async function uploadMri(file: File): Promise<AnalysisResponse> {
   const formData = new FormData();

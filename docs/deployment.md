@@ -15,6 +15,7 @@ Recommended settings:
 
 - `Runtime`: Python
 - `Root directory`: `backend`
+- `Python version`: set `PYTHON_VERSION=3.11.13` in Render, or keep the checked-in `backend/.python-version`
 - `Build command`: `pip install -r requirements.txt`
 - `Start command`: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 
@@ -41,6 +42,8 @@ Model paths:
 
 If the model paths are empty, the backend still runs using its deterministic fallback logic.
 
+For Render specifically, avoid the default Python 3.14 runtime. This project is pinned to Python 3.11.13 so `onnxruntime` installs cleanly.
+
 ## 2. Deploy the frontend on Vercel
 
 Create a new Vercel project and set the `frontend/` directory as the project root.
@@ -54,7 +57,9 @@ Recommended settings:
 
 Environment variables:
 
-- `NEXT_PUBLIC_API_BASE_URL=https://<your-render-backend>.onrender.com/api`
+- `BACKEND_API_URL=https://<your-render-backend>.onrender.com/api`
+
+The frontend calls `/api/...` on its own domain in production, and Next.js rewrites that to your Render backend using `BACKEND_API_URL`.
 
 ## 3. Local example files
 
@@ -68,7 +73,7 @@ Use these as a reference for the production environment:
 
 1. Open the backend health endpoint and confirm it returns `ok`.
 2. Open the frontend and upload one MRI image.
-3. If the analysis page fails to call the backend, confirm `NEXT_PUBLIC_API_BASE_URL` matches the Render URL.
+3. If the analysis page fails to call the backend, confirm `BACKEND_API_URL` matches the Render URL and that the Vercel build was redeployed after setting it.
 4. If you later host real model weights externally, set the four `*_MODEL_PATH` values in the backend environment.
 
 ## Notes
