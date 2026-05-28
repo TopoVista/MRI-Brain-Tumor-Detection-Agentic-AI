@@ -53,7 +53,13 @@ def build_differential_diagnosis(probabilities: dict[str, float]) -> list[dict]:
     ]
 
 
-def build_recommended_actions(prediction: str, confidence: float, verified: bool, dissenting_agents: list[str]) -> list[str]:
+def build_recommended_actions(
+    prediction: str,
+    confidence: float,
+    verified: bool,
+    dissenting_agents: list[str],
+    verifier_executed: bool = True,
+) -> list[str]:
     actions = []
     if prediction == "notumor":
         actions.append("Use the result as supportive evidence only; correlate with the full MRI study and symptoms.")
@@ -66,7 +72,7 @@ def build_recommended_actions(prediction: str, confidence: float, verified: bool
     if dissenting_agents:
         actions.append(f"Model disagreement detected across: {', '.join(dissenting_agents)}. Treat the classification as uncertain.")
 
-    if not verified:
+    if verifier_executed and not verified:
         actions.append("Verifier flags should be reviewed before relying on the generated note.")
 
     return actions

@@ -10,7 +10,7 @@ export function RecentCases({ cases }: { cases: AnalysisSummary[] }) {
       </CardHeader>
       <CardContent>
         {cases.length ? (
-          <div className="overflow-hidden rounded-[1.5rem] border border-slate-200">
+          <div className="overflow-hidden rounded-lg border border-slate-200">
             <div className="grid grid-cols-[1.1fr_1fr_0.7fr] gap-4 bg-slate-50 px-5 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
               <span>Case</span>
               <span>Prediction</span>
@@ -32,7 +32,7 @@ export function RecentCases({ cases }: { cases: AnalysisSummary[] }) {
             </div>
           </div>
         ) : (
-          <div className="rounded-[1.4rem] border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-7 text-slate-600">
+          <div className="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-7 text-slate-600">
             No stored analyses yet.
           </div>
         )}

@@ -42,6 +42,8 @@ export type ConsensusSummary = {
 
 export type AnalysisResponse = {
   case_id: string;
+  workflow_mode: "paper_core" | "extended_support";
+  extensions_applied: string[];
   prediction: "glioma" | "meningioma" | "notumor" | "pituitary";
   confidence: number;
   severity_band: "high" | "moderate" | "low";

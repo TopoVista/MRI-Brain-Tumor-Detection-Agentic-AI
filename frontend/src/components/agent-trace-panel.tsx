@@ -18,9 +18,9 @@ const icons: Record<string, typeof Cpu> = {
 };
 
 function tone(status: string) {
-  if (status === "completed") return "bg-emerald-50 text-emerald-700";
-  if (status === "warning") return "bg-amber-50 text-amber-700";
-  return "bg-sky-50 text-sky-700";
+  if (status === "completed") return "border-emerald-500/30 bg-emerald-950/30 text-emerald-200";
+  if (status === "warning") return "border-amber-500/30 bg-amber-950/30 text-amber-200";
+  return "border-sky-500/30 bg-sky-950/25 text-sky-200";
 }
 
 export function AgentTracePanel({ result, traces }: { result: AnalysisResponse | null; traces?: AgentTrace[] }) {
@@ -36,24 +36,24 @@ export function AgentTracePanel({ result, traces }: { result: AnalysisResponse |
           traceEntries.map((trace, index) => {
             const Icon = icons[trace.agent] ?? Cpu;
             return (
-              <div key={`${trace.agent}-${index}`} className="flex gap-4 rounded-[1.4rem] border border-slate-200 bg-white p-4">
-                <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <div key={`${trace.agent}-${index}`} className="flex gap-4 rounded-lg border border-border bg-secondary p-4">
+                <div className="mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-md bg-primary/18 text-sky-200">
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center justify-between gap-3">
-                    <p className="font-semibold capitalize text-slate-900">{trace.agent.replaceAll("_", " ")}</p>
-                    <span className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] ${tone(trace.status)}`}>
+                    <p className="font-semibold capitalize text-white">{trace.agent.replaceAll("_", " ")}</p>
+                    <span className={`rounded-md border px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.15em] ${tone(trace.status)}`}>
                       {trace.status}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{trace.detail}</p>
+                  <p className="mt-2 text-sm leading-6 text-slate-300">{trace.detail}</p>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="rounded-[1.4rem] border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-7 text-slate-600">
+          <div className="rounded-lg border border-dashed border-border bg-secondary p-6 text-sm leading-7 text-slate-300">
             Run an upload to inspect stage handoffs.
           </div>
         )}

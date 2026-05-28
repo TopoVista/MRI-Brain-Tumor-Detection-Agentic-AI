@@ -10,6 +10,17 @@ def load_image_bytes(content: bytes) -> Image.Image:
     return image
 
 
+def apply_paper_preprocessing(image: Image.Image, size: tuple[int, int]) -> Image.Image:
+    image_array = np.array(image)
+    gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
+    resized = cv2.resize(gray, size, interpolation=cv2.INTER_AREA).astype(np.uint8)
+    blurred = cv2.GaussianBlur(resized, (5, 5), 0)
+    laplacian = cv2.Laplacian(blurred, cv2.CV_32F)
+    enhanced = np.clip(blurred + 0.10 * laplacian, 0, 255).astype(np.uint8)
+    stacked = np.stack([enhanced, enhanced, enhanced], axis=-1)
+    return Image.fromarray(stacked)
+
+
 def extract_mri_features(image: Image.Image, size: tuple[int, int] = (224, 224)) -> dict:
     image_array = np.array(image)
     gray = cv2.cvtColor(image_array, cv2.COLOR_RGB2GRAY)
@@ -38,7 +49,8 @@ def extract_mri_features(image: Image.Image, size: tuple[int, int] = (224, 224))
 
 
 def prepare_model_tensor(image: Image.Image, size: int, channels: int = 3) -> np.ndarray:
-    resized = image.resize((size, size))
+    preprocessed = apply_paper_preprocessing(image=image, size=(size, size))
+    resized = preprocessed.resize((size, size))
     image_array = np.array(resized).astype(np.float32) / 255.0
 
     if channels == 1:

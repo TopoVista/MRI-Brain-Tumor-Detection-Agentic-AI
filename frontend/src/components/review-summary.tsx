@@ -8,12 +8,12 @@ export function ReviewSummary({ result }: { result: AnalysisResponse | null }) {
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="border-b border-slate-100 bg-[linear-gradient(180deg,#ffffff,#f7fbfd)]">
+      <CardHeader className="border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff,#f7fafc)]">
         <CardTitle>Review summary</CardTitle>
         <CardDescription>Compact interpretation aids beside the report.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4 p-5 lg:grid-cols-3">
-        <div className="rounded-[1.3rem] border border-slate-200 bg-white p-4">
+        <div className="rounded-md border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-2 text-slate-500">
             <BrainCircuit className="h-4 w-4 text-sky-700" />
             <span className="text-xs font-semibold uppercase tracking-[0.18em]">Consensus</span>
@@ -26,7 +26,7 @@ export function ReviewSummary({ result }: { result: AnalysisResponse | null }) {
           </p>
         </div>
 
-        <div className="rounded-[1.3rem] border border-slate-200 bg-white p-4">
+        <div className="rounded-md border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-2 text-slate-500">
             <FileSearch className="h-4 w-4 text-sky-700" />
             <span className="text-xs font-semibold uppercase tracking-[0.18em]">Evidence</span>
@@ -35,7 +35,7 @@ export function ReviewSummary({ result }: { result: AnalysisResponse | null }) {
           <p className="mt-2 text-sm leading-6 text-slate-500">The review surface keeps supporting literature adjacent to the generated note.</p>
         </div>
 
-        <div className="rounded-[1.3rem] border border-slate-200 bg-white p-4">
+        <div className="rounded-md border border-slate-200 bg-white p-4">
           <div className="flex items-center gap-2 text-slate-500">
             <ShieldAlert className="h-4 w-4 text-sky-700" />
             <span className="text-xs font-semibold uppercase tracking-[0.18em]">Verification</span>

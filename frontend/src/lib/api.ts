@@ -1,20 +1,6 @@
-import { AgentTrace, AnalysisResponse, AnalysisSummary, ModelVote } from "@/lib/types";
+import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
 
 const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8000/api";
-
-export async function fetchCases(): Promise<AnalysisSummary[]> {
-  try {
-    const response = await fetch(`${baseUrl}/analysis/cases`, {
-      cache: "no-store",
-    });
-    if (!response.ok) {
-      return [];
-    }
-    return response.json();
-  } catch {
-    return [];
-  }
-}
 
 export async function uploadMri(file: File): Promise<AnalysisResponse> {
   const formData = new FormData();

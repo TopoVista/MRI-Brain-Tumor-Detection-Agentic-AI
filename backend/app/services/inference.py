@@ -15,6 +15,10 @@ logger = get_logger(__name__)
 settings = get_settings()
 
 
+class StrictModelWeightsError(RuntimeError):
+    pass
+
+
 @dataclass
 class ModelInferenceResult:
     agent: str
@@ -40,9 +44,14 @@ class MultiModelInferenceService:
             return settings.model_path
         return None
 
-    def _get_session(self, agent: str) -> ort.InferenceSession | None:
+    def _get_session(self, agent: str, strict: bool = False) -> ort.InferenceSession | None:
         model_path = self._resolve_model_path(agent)
         if model_path is None:
+            if strict:
+                raise StrictModelWeightsError(
+                    f"Strict paper-core inference requires ONNX weights for {agent}. "
+                    f"Configure {MODEL_AGENT_SPECS[agent]['config_key']} before running the default workflow."
+                )
             return None
         if agent not in self._sessions:
             logger.info("Loading %s ONNX model from %s", agent, model_path)
@@ -56,7 +65,7 @@ class MultiModelInferenceService:
         return exp / np.sum(exp)
 
     def _session_predict(self, agent: str, image: Image.Image) -> ModelInferenceResult:
-        session = self._get_session(agent)
+        session = self._get_session(agent, strict=False)
         assert session is not None
         spec = MODEL_AGENT_SPECS[agent]
         input_def = session.get_inputs()[0]
@@ -124,10 +133,15 @@ class MultiModelInferenceService:
             ),
         )
 
-    def predict(self, agent: str, image: Image.Image, features: dict) -> ModelInferenceResult:
-        session = self._get_session(agent)
+    def predict(self, agent: str, image: Image.Image, features: dict, strict: bool = False) -> ModelInferenceResult:
+        session = self._get_session(agent, strict=strict)
         if session is not None:
             return self._session_predict(agent=agent, image=image)
+        if strict:
+            raise StrictModelWeightsError(
+                f"Strict paper-core inference requires ONNX weights for {agent}. "
+                f"Configure {MODEL_AGENT_SPECS[agent]['config_key']} before running the default workflow."
+            )
         return self._heuristic_predict(agent=agent, features=features)
 
 

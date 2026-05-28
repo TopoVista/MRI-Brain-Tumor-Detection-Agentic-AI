@@ -21,8 +21,8 @@ def run_preprocessing_agent(content: bytes) -> dict:
     }
 
 
-def run_model_agent(agent: str, image: Image.Image, features: dict) -> dict:
-    result = inference_service.predict(agent=agent, image=image, features=features)
+def run_model_agent(agent: str, image: Image.Image, features: dict, strict: bool = False) -> dict:
+    result = inference_service.predict(agent=agent, image=image, features=features, strict=strict)
     logger.info("%s prediction=%s confidence=%.3f", agent, result.prediction, result.confidence)
     return {
         "agent": agent,

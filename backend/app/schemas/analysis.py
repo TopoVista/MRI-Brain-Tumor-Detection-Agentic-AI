@@ -61,6 +61,8 @@ class AnalysisResponse(BaseModel):
     model_config = ConfigDict(protected_namespaces=())
 
     case_id: str
+    workflow_mode: Literal["paper_core", "extended_support"] = "paper_core"
+    extensions_applied: list[str] = Field(default_factory=list)
     prediction: Literal["glioma", "meningioma", "notumor", "pituitary"]
     confidence: float = Field(ge=0.0, le=1.0)
     severity_band: Literal["high", "moderate", "low"]

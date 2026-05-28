@@ -2,24 +2,14 @@
 
 import { useState } from "react";
 
-import { AgentTracePanel } from "@/components/agent-trace-panel";
-import { CitationsPanel } from "@/components/citations-panel";
 import { Hero } from "@/components/hero";
-import { OperationsPanel } from "@/components/operations-panel";
-import { RecentCases } from "@/components/recent-cases";
 import { ReportPanel } from "@/components/report-panel";
-import { ReviewSummary } from "@/components/review-summary";
 import { UploadPanel } from "@/components/upload-panel";
 import { WorkflowGraph } from "@/components/workflow-graph";
-import { AgentTrace, AnalysisResponse, AnalysisSummary, ModelVote } from "@/lib/types";
+import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
 
-type DashboardClientProps = {
-  initialCases: AnalysisSummary[];
-};
-
-export function DashboardClient({ initialCases }: DashboardClientProps) {
+export function DashboardClient() {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
-  const [cases, setCases] = useState<AnalysisSummary[]>(initialCases);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [liveTrace, setLiveTrace] = useState<AgentTrace[]>([]);
@@ -30,15 +20,6 @@ export function DashboardClient({ initialCases }: DashboardClientProps) {
     setResult(next);
     setLiveTrace(next.agent_trace);
     setLiveModelVotes(next.model_votes);
-    setCases((current) => [
-      {
-        case_id: next.case_id,
-        prediction: next.prediction,
-        confidence: next.confidence,
-        created_at: new Date().toISOString(),
-      },
-      ...current,
-    ]);
   }
 
   function resetWorkflowState() {
@@ -53,9 +34,9 @@ export function DashboardClient({ initialCases }: DashboardClientProps) {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col gap-8 px-4 py-6 sm:px-6 lg:px-8">
-      <Hero />
-      <section className="grid gap-6 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-start">
+    <main className="flex min-h-screen w-full max-w-none flex-col gap-5 px-[clamp(1rem,2.4vw,2.25rem)] py-5">
+      <Hero result={result} isUploading={isUploading} />
+      <section className="grid gap-5 xl:grid-cols-[minmax(360px,27vw)_minmax(0,1fr)] xl:items-start">
         <div className="grid gap-6 xl:sticky xl:top-6">
           <UploadPanel
             onResult={handleResult}
@@ -67,27 +48,20 @@ export function DashboardClient({ initialCases }: DashboardClientProps) {
             onTraceUpdate={appendTrace}
             onModelVotesUpdate={setLiveModelVotes}
           />
-          <OperationsPanel result={result} isUploading={isUploading} />
-          <RecentCases cases={cases} />
         </div>
 
         <div className="grid gap-6">
           <WorkflowGraph result={result} isUploading={isUploading} activeAgent={activeAgent} liveTrace={liveTrace} />
-          <ReviewSummary result={result} />
-          <ReportPanel
-            result={result}
-            isUploading={isUploading}
-            previewUrl={previewUrl}
-            activeAgent={activeAgent}
-            liveTrace={liveTrace}
-            liveModelVotes={liveModelVotes}
-          />
-          <div className="grid gap-6 2xl:grid-cols-[1.02fr_0.98fr]">
-            <CitationsPanel result={result} />
-            <AgentTracePanel result={result} traces={liveTrace} />
-          </div>
         </div>
       </section>
+      <ReportPanel
+        result={result}
+        isUploading={isUploading}
+        previewUrl={previewUrl}
+        activeAgent={activeAgent}
+        liveTrace={liveTrace}
+        liveModelVotes={liveModelVotes}
+      />
     </main>
   );
 }
