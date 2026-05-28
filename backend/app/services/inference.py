@@ -33,6 +33,9 @@ class MultiModelInferenceService:
     def __init__(self) -> None:
         self._sessions: dict[str, ort.InferenceSession] = {}
 
+    def has_configured_weights(self) -> bool:
+        return all(self._resolve_model_path(agent) is not None for agent in MODEL_AGENT_SPECS)
+
     def _resolve_model_path(self, agent: str) -> Path | None:
         spec = MODEL_AGENT_SPECS[agent]
         configured = getattr(settings, spec["config_key"])

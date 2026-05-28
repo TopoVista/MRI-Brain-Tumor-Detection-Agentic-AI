@@ -7,7 +7,9 @@ from app.agents.retrieval_agent import run_retrieval_agent
 from app.agents.verifier_agent import run_verifier_agent
 from app.schemas.analysis import AgentTrace, AnalysisResponse, ClassProbability, ConsensusSummary, ModelVote, TumorProfile
 from app.services.case_repository import save_case
+from app.core.config import get_settings
 from app.services.clinical_support import TUMOR_PROFILES, build_differential_diagnosis, build_recommended_actions
+from app.services.inference import inference_service
 from app.services.storage import store_scan
 
 
@@ -301,21 +303,46 @@ def _initial_state(filename: str, content: bytes, workflow_mode: str) -> Workflo
     }
 
 
+def _paper_core_is_strict() -> bool:
+    # Strict mode is opt-in so free deployments can fall back cleanly when weights are absent.
+    return settings.strict_paper_core and inference_service.has_configured_weights()
+
+
+def _bind_model_step(agent: str, strict: bool) -> Callable[[WorkflowState], WorkflowState]:
+    def runner(state: WorkflowState) -> WorkflowState:
+        return _model_node(state, agent=agent, strict=strict)
+
+    return runner
+
+
 def _run_steps(state: WorkflowState, steps: list[tuple[str, Callable[[WorkflowState], WorkflowState]]]) -> WorkflowState:
     for _, handler in steps:
         state = handler(state)
     return state
 
 
+def _core_steps() -> list[tuple[str, Callable[[WorkflowState], WorkflowState]]]:
+    strict_mode = _paper_core_is_strict()
+    return [
+        ("storage", upload_node),
+        ("preprocessing_agent", preprocessing_node),
+        ("cnn_agent", _bind_model_step("cnn_agent", strict_mode)),
+        ("resnet50_agent", _bind_model_step("resnet50_agent", strict_mode)),
+        ("vgg16_agent", _bind_model_step("vgg16_agent", strict_mode)),
+        ("inception_v3_agent", _bind_model_step("inception_v3_agent", strict_mode)),
+        ("orchestration_agent", orchestration_node),
+    ]
+
+
 async def run_analysis_workflow(filename: str, content: bytes) -> AnalysisResponse:
     state = _initial_state(filename=filename, content=content, workflow_mode="paper_core")
-    result = _run_steps(state, PAPER_CORE_STEPS)
+    result = _run_steps(state, _core_steps())
     return _build_response_from_state(state["case_id"], result)
 
 
 async def run_extended_analysis_workflow(filename: str, content: bytes) -> AnalysisResponse:
     state = _initial_state(filename=filename, content=content, workflow_mode="extended_support")
-    state = _run_steps(state, PAPER_CORE_STEPS)
+    state = _run_steps(state, _core_steps())
     state = _run_steps(state, EXTENDED_STEPS)
     return _build_response_from_state(state["case_id"], state)
 
@@ -326,7 +353,7 @@ async def stream_analysis_workflow(filename: str, content: bytes, extended: bool
         content=content,
         workflow_mode="extended_support" if extended else "paper_core",
     )
-    steps = PAPER_CORE_STEPS + (EXTENDED_STEPS if extended else [])
+    steps = _core_steps() + (EXTENDED_STEPS if extended else [])
 
     for agent, handler in steps:
         yield {"type": "stage", "agent": agent, "status": "running", "case_id": state["case_id"]}
@@ -341,3 +368,4 @@ async def stream_analysis_workflow(filename: str, content: bytes, extended: bool
 
     response = _build_response_from_state(state["case_id"], state)
     yield {"type": "complete", "case_id": state["case_id"], "result": response.model_dump()}
+settings = get_settings()
