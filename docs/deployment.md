@@ -59,6 +59,8 @@ Environment variables:
 
 - `NEXT_PUBLIC_API_BASE_URL=https://<your-render-backend>.onrender.com/api`
 
+If you prefer, you can leave `NEXT_PUBLIC_API_BASE_URL` unset because the frontend now rewrites `/api/*` to your Render backend automatically.
+
 ## 3. Local example files
 
 Use these as a reference for the production environment:
@@ -71,7 +73,7 @@ Use these as a reference for the production environment:
 
 1. Open the backend health endpoint and confirm it returns `ok`.
 2. Open the frontend and upload one MRI image.
-3. If the analysis page fails to call the backend, confirm `NEXT_PUBLIC_API_BASE_URL` matches the Render URL and that the Vercel build was redeployed after setting it.
+3. If the analysis page fails to call the backend, redeploy Vercel after the latest frontend changes. If you kept `NEXT_PUBLIC_API_BASE_URL` set, confirm it matches the Render URL.
 4. If you later host real model weights externally, set the four `*_MODEL_PATH` values in the backend environment.
 
 ## Notes
