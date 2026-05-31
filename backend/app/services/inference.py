@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from pathlib import Path
+from urllib.parse import urlparse
 
 import numpy as np
 import onnxruntime as ort
+import requests
 from PIL import Image
 
 from app.core.config import get_settings
@@ -32,9 +34,25 @@ class ModelInferenceResult:
 class MultiModelInferenceService:
     def __init__(self) -> None:
         self._sessions: dict[str, ort.InferenceSession] = {}
+        self._downloaded_paths: dict[str, Path] = {}
 
     def has_configured_weights(self) -> bool:
         return all(self._resolve_model_path(agent) is not None for agent in MODEL_AGENT_SPECS)
+
+    def _cache_model_path(self, agent: str, source_url: str) -> Path:
+        if agent in self._downloaded_paths:
+            return self._downloaded_paths[agent]
+
+        settings.model_cache_dir.mkdir(parents=True, exist_ok=True)
+        suffix = Path(urlparse(source_url).path).suffix or ".onnx"
+        target = settings.model_cache_dir / f"{agent}{suffix}"
+        if not target.exists():
+            logger.info("Downloading %s model from %s", agent, source_url)
+            response = requests.get(source_url, timeout=120)
+            response.raise_for_status()
+            target.write_bytes(response.content)
+        self._downloaded_paths[agent] = target
+        return target
 
     def _resolve_model_path(self, agent: str) -> Path | None:
         spec = MODEL_AGENT_SPECS[agent]
@@ -42,6 +60,10 @@ class MultiModelInferenceService:
         path = settings.resolve_model_path(configured)
         if path and path.exists():
             return path
+
+        configured_url = getattr(settings, spec.get("url_key", ""))
+        if configured_url:
+            return self._cache_model_path(agent, configured_url)
 
         if agent == "cnn_agent" and settings.model_path and settings.model_path.exists():
             return settings.model_path

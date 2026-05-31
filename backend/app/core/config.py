@@ -20,11 +20,16 @@ class Settings(BaseSettings):
     sqlite_path: str = Field(default="storage/mri_copilot.db", alias="SQLITE_PATH")
     chroma_path: str = Field(default="chroma", alias="CHROMA_PATH")
     storage_path: str = Field(default="storage/uploads", alias="STORAGE_PATH")
+    model_cache_path: str = Field(default="storage/model-cache", alias="MODEL_CACHE_PATH")
     mri_model_path: str = Field(default="", alias="MRI_MODEL_PATH")
     cnn_model_path: str = Field(default="", alias="CNN_MODEL_PATH")
+    cnn_model_url: str = Field(default="", alias="CNN_MODEL_URL")
     resnet50_model_path: str = Field(default="", alias="RESNET50_MODEL_PATH")
+    resnet50_model_url: str = Field(default="", alias="RESNET50_MODEL_URL")
     vgg16_model_path: str = Field(default="", alias="VGG16_MODEL_PATH")
+    vgg16_model_url: str = Field(default="", alias="VGG16_MODEL_URL")
     inception_v3_model_path: str = Field(default="", alias="INCEPTION_V3_MODEL_PATH")
+    inception_v3_model_url: str = Field(default="", alias="INCEPTION_V3_MODEL_URL")
     mri_confidence_threshold: float = Field(default=0.72, alias="MRI_CONFIDENCE_THRESHOLD")
     top_k_literature: int = Field(default=3, alias="TOP_K_LITERATURE")
     gemini_api_key: str = Field(default="", alias="GEMINI_API_KEY")
@@ -49,6 +54,10 @@ class Settings(BaseSettings):
     @property
     def storage_dir(self) -> Path:
         return BASE_DIR / self.storage_path
+
+    @property
+    def model_cache_dir(self) -> Path:
+        return BASE_DIR / self.model_cache_path
 
     @property
     def model_path(self) -> Path | None:

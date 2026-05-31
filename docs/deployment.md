@@ -38,9 +38,16 @@ Optional environment variables:
 Model paths:
 
 - Leave the model path variables empty for the free demo mode, or
-- point them to hosted artifacts if you later upload the ONNX files somewhere external
+- set either local paths or model URLs if you upload the ONNX files somewhere external
 
-If the model paths are empty, the backend still runs using its deterministic fallback logic.
+If you want the deployed app to actually use CNN, ResNet-50, VGG16, and Inception V3 on Render, host the four `.onnx` files somewhere public and set:
+
+- `CNN_MODEL_URL`
+- `RESNET50_MODEL_URL`
+- `VGG16_MODEL_URL`
+- `INCEPTION_V3_MODEL_URL`
+
+The backend will download those files on first use and cache them under `storage/model-cache/`. If neither local paths nor URLs are configured, the backend still runs using its deterministic fallback logic.
 
 For Render specifically, avoid the default Python 3.14 runtime. This project is pinned to Python 3.11.13 so `onnxruntime` installs cleanly.
 
@@ -81,3 +88,29 @@ Use these as a reference for the production environment:
 - The Render free tier can sleep when idle.
 - The Vercel frontend is free for personal projects.
 - If you want fully model-backed inference instead of fallback mode, you need to host the ONNX files somewhere accessible to the backend.
+
+## 5. Optional: host the ONNX models on Hugging Face
+
+The easiest free place to host the four ONNX files is a public Hugging Face model repo. Hugging Face supports uploading large files through the web UI or the `hf` CLI, and individual files can be downloaded directly from the Hub or via `hf_hub_download()` URLs.
+
+Recommended repo setup:
+
+- Repo name: `topovista-mri-onnx`
+- Visibility: `Public`
+- Files:
+  - `cnn.onnx`
+  - `resnet50.onnx`
+  - `vgg16.onnx`
+  - `inception_v3.onnx`
+
+After uploading, set these Render environment variables:
+
+```env
+CNN_MODEL_URL=https://huggingface.co/<your-username>/topovista-mri-onnx/resolve/main/cnn.onnx
+RESNET50_MODEL_URL=https://huggingface.co/<your-username>/topovista-mri-onnx/resolve/main/resnet50.onnx
+VGG16_MODEL_URL=https://huggingface.co/<your-username>/topovista-mri-onnx/resolve/main/vgg16.onnx
+INCEPTION_V3_MODEL_URL=https://huggingface.co/<your-username>/topovista-mri-onnx/resolve/main/inception_v3.onnx
+STRICT_PAPER_CORE=true
+```
+
+Keep `STRICT_PAPER_CORE=true` only after all four URLs are set and the files are public. The backend will download each file on first use and cache it in `storage/model-cache/`.
