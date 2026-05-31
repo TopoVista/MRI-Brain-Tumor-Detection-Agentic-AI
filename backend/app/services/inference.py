@@ -32,7 +32,6 @@ class ModelInferenceResult:
 
 class MultiModelInferenceService:
     def __init__(self) -> None:
-        self._sessions: dict[str, object] = {}
         self._downloaded_paths: dict[str, Path] = {}
 
     def has_configured_weights(self) -> bool:
@@ -79,10 +78,8 @@ class MultiModelInferenceService:
                     f"Configure {MODEL_AGENT_SPECS[agent]['config_key']} before running the default workflow."
                 )
             return None
-        if agent not in self._sessions:
-            logger.info("Loading %s ONNX model from %s", agent, model_path)
-            self._sessions[agent] = ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
-        return self._sessions[agent]
+        logger.info("Loading %s ONNX model from %s", agent, model_path)
+        return ort.InferenceSession(str(model_path), providers=["CPUExecutionProvider"])
 
     @staticmethod
     def _softmax(values: np.ndarray) -> np.ndarray:
@@ -90,9 +87,7 @@ class MultiModelInferenceService:
         exp = np.exp(shifted)
         return exp / np.sum(exp)
 
-    def _session_predict(self, agent: str, image: Image.Image) -> ModelInferenceResult:
-        session = self._get_session(agent, strict=False)
-        assert session is not None
+    def _session_predict(self, agent: str, image: Image.Image, session) -> ModelInferenceResult:
         spec = MODEL_AGENT_SPECS[agent]
         input_def = session.get_inputs()[0]
         shape = input_def.shape
@@ -162,7 +157,10 @@ class MultiModelInferenceService:
     def predict(self, agent: str, image: Image.Image, features: dict, strict: bool = False) -> ModelInferenceResult:
         session = self._get_session(agent, strict=strict)
         if session is not None:
-            return self._session_predict(agent=agent, image=image)
+            result = self._session_predict(agent=agent, image=image, session=session)
+            if not settings.cache_onnx_sessions:
+                del session
+            return result
         if strict:
             raise StrictModelWeightsError(
                 f"Strict paper-core inference requires ONNX weights for {agent}. "

@@ -1,26 +1,57 @@
 # Architecture
 
-## Request flow
+## System View
 
-1. MRI image upload from the Next.js UI
-2. FastAPI route validates image payload
-3. LangGraph orchestrator stores the scan
-4. Preprocessing agent normalizes the image and extracts MRI features
-5. Algorithm agents run independently:
-   - Proposed CNN agent
-   - ResNet-50 agent
-   - VGG16 agent
-   - Inception V3 agent
-6. Orchestration agent aggregates model votes into one final class
-7. Retrieval agent queries ChromaDB for supporting medical context
-8. Report agent drafts a grounded report
-9. Verification agent checks evidence coverage, agreement, and safety wording
-10. SQLite persists the final case summary
+```mermaid
+flowchart TD
+  U[Browser] --> F[Next.js frontend]
+  F --> B[FastAPI backend]
+  B --> P[Preprocessing agent]
+  P --> A1[CNN agent]
+  A1 --> A2[ResNet-50 agent]
+  A2 --> A3[VGG16 agent]
+  A3 --> A4[Inception V3 agent]
+  A4 --> O[Orchestration agent]
+  O --> R[Report output]
+  O --> S[SQLite case memory]
+```
 
-## Safety model
+## Request Flow
 
-- AI-assisted only, no autonomous diagnosis
+1. User uploads an MRI image in the frontend.
+2. The frontend sends the file to the backend upload endpoint.
+3. The backend stores the image locally or in Cloudinary if configured.
+4. Preprocessing extracts MRI features and prepares model input.
+5. Four algorithm agents run in sequence.
+6. The orchestration agent combines the model votes.
+7. The report and case metadata are assembled.
+8. The response is streamed back to the UI and persisted locally.
+
+## Modes
+
+### Local Demo Mode
+
+- Uses local paths under `artifacts/models/`
+- Can fall back to heuristic outputs if weights are missing
+- Keeps the app runnable on a normal laptop
+
+### Model-Backed Mode
+
+- Uses the exported ONNX files
+- Runs the actual four-agent classification path
+- Produces the same UI flow, but with real model votes
+
+## Storage
+
+- MRI uploads: `storage/uploads/`
+- SQLite database: `storage/mri_copilot.db`
+- Optional vector store: `chroma/`
+- Optional model cache: `storage/model-cache/`
+
+## Safety
+
+- AI-assisted only
 - Explicit uncertainty handling
-- Citation grounding
-- Verifier checks for missing evidence and weak safety language
-- Confidence threshold support for escalation
+- No autonomous diagnosis
+- Optional verifier layer for extended workflows
+

@@ -1,8 +1,22 @@
-## Dataset Overview
+# Dataset
 
-This project includes a local brain MRI classification dataset under `datasets/brain-tumor-mri/`.
+This directory contains the local MRI dataset used for experimentation and future training.
 
-### Structure
+## Structure
+
+```mermaid
+flowchart TD
+  A[datasets/brain-tumor-mri] --> B[Training]
+  A --> C[Testing]
+  B --> D[glioma]
+  B --> E[meningioma]
+  B --> F[notumor]
+  B --> G[pituitary]
+  C --> D
+  C --> E
+  C --> F
+  C --> G
+```
 
 ```text
 datasets/
@@ -19,22 +33,24 @@ datasets/
       pituitary/
 ```
 
-### Intended Use
+## Purpose
 
-- `Training/`: reference data for future model training or offline evaluation
-- `Testing/`: holdout examples for local validation and demos
-- Current app runtime: not required for upload inference, but useful for experiments, benchmarking, and future ONNX model replacement
+- `Training/` is used for future model training or offline experimentation.
+- `Testing/` is useful for validation and demo cases.
+- The current app can run without reading this folder at runtime, but the dataset is kept for reproducibility and training work.
 
-### Notes
+## Class Labels
 
-- Source imported from `C:\Users\KIIT0001\Desktop\marksheets\archive`
-- Approximate size: 7,200 images total
-- Class labels:
-  - `glioma`
-  - `meningioma`
-  - `notumor`
-  - `pituitary`
+- `glioma`
+- `meningioma`
+- `notumor`
+- `pituitary`
 
-### Recommendation
+## Source
 
-If you later train or convert a real classifier, keep any preprocessing scripts and label metadata in `scripts/` or `datasets/metadata/` rather than mixing them into the raw image folders.
+- Imported locally from `C:\Users\KIIT0001\Desktop\marksheets\archive`
+
+## Recommendation
+
+If you extend the training scripts later, keep any metadata or preprocessing helpers alongside `scripts/` or `docs/` so the raw dataset folders stay clean.
+
