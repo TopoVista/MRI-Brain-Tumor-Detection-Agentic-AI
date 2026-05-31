@@ -114,3 +114,26 @@ STRICT_PAPER_CORE=true
 ```
 
 Keep `STRICT_PAPER_CORE=true` only after all four URLs are set and the files are public. The backend will download each file on first use and cache it in `storage/model-cache/`.
+
+## 6. Optional: store uploads in Cloudinary
+
+Right now, uploaded MRI images fall back to local storage on Render if no Cloudinary credentials are set. For a more durable free deployment, use Cloudinary so uploads are stored outside the Render filesystem.
+
+What to create in Cloudinary:
+
+- Account: free Cloudinary account
+- Keep the default upload preset setup unless you already have one
+- Copy these values from the Cloudinary dashboard:
+  - `cloud_name`
+  - `api_key`
+  - `api_secret`
+
+Then set these Render environment variables:
+
+```env
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+After setting them, redeploy Render. The backend will automatically switch to Cloudinary uploads and only fall back to local disk if an upload request fails.
