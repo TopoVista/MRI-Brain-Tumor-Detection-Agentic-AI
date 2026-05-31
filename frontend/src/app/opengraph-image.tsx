@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "Agentic MRI Analysis Copilot";
+export const alt = "Brain MRI Tumor Classification";
 export const size = {
   width: 1200,
   height: 630,
@@ -43,17 +43,17 @@ export default function Image() {
           >
             <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
               <div style={{ fontSize: 18, textTransform: "uppercase", letterSpacing: "0.34em", color: "#4e6476" }}>
-                MRI Brain Tumor Copilot
+                Brain MRI Tumor Classification
               </div>
               <div style={{ fontSize: 62, lineHeight: 1.08, fontWeight: 700 }}>
-                Brain MRI classification with grounded reporting and verified workflow review.
+                Upload a brain MRI and see the model result, confidence, and model votes.
               </div>
               <div style={{ fontSize: 28, lineHeight: 1.5, color: "#4e6476" }}>
-                Four model agents, literature retrieval, verification, and structured clinical support.
+                Four model votes, a plain summary, and the main details in one view.
               </div>
             </div>
             <div style={{ display: "flex", gap: "16px" }}>
-              {["Glioma", "Meningioma", "Pituitary", "No Tumor"].map((label) => (
+              {["Glioma", "Meningioma", "Pituitary", "No tumor"].map((label) => (
                 <div
                   key={label}
                   style={{

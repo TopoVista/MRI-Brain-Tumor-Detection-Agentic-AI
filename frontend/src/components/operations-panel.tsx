@@ -5,11 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { AnalysisResponse } from "@/lib/types";
 
 const checklist = [
-  { label: "Inference", detail: "4 trained ONNX agents", icon: Cpu },
-  { label: "Grounding", detail: "Literature retrieval enabled", icon: FileSearch },
-  { label: "Reporting", detail: "Markdown clinical note", icon: Stethoscope },
-  { label: "Verification", detail: "Reasoning safety checks", icon: ShieldCheck },
-  { label: "Persistence", detail: "SQLite + Chroma memory", icon: Database },
+  { label: "Models", detail: "Four ONNX model votes", icon: Cpu },
+  { label: "Sources", detail: "Optional source lookup", icon: FileSearch },
+  { label: "Summary", detail: "Plain text result note", icon: Stethoscope },
+  { label: "Checks", detail: "Optional result checks", icon: ShieldCheck },
+  { label: "Saved cases", detail: "SQLite + Chroma storage", icon: Database },
 ];
 
 function predictionTone(prediction?: string | null) {
@@ -23,17 +23,17 @@ export function OperationsPanel({ result, isUploading }: { result: AnalysisRespo
   return (
     <Card className="overflow-hidden">
       <CardHeader className="border-b border-slate-100 bg-[linear-gradient(180deg,#ffffff,#f7fbfd)]">
-        <CardTitle>Operations</CardTitle>
-        <CardDescription>Live product status and case context.</CardDescription>
+        <CardTitle>System status</CardTitle>
+        <CardDescription>Current upload and analysis state.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 p-5">
         <div className="overflow-hidden rounded-md border border-slate-200 bg-[linear-gradient(180deg,#fbfeff,#f1f8fb)]">
           <div className="grid lg:grid-cols-[1.05fr_0.95fr]">
             <div className="p-4">
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400">Current state</p>
-              <p className="mt-3 text-2xl font-semibold text-slate-900">{isUploading ? "Running workflow" : result ? "Case reviewed" : "Ready for intake"}</p>
+              <p className="mt-3 text-2xl font-semibold text-slate-900">{isUploading ? "Processing" : result ? "Case reviewed" : "Ready"}</p>
               <p className={`mt-2 text-sm font-medium ${predictionTone(result?.prediction)}`}>
-                {result ? `Latest ensemble class: ${result.prediction}` : "Upload a scan to begin analysis."}
+                {result ? `Latest result: ${result.prediction}` : "Upload a scan to begin."}
               </p>
             </div>
             <div className="border-l border-slate-200 bg-white/60">

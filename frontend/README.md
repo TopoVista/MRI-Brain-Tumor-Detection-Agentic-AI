@@ -1,13 +1,21 @@
 # Frontend
 
-This is the Next.js UI for the MRI copilot.
+This is the Next.js interface for the brain MRI tumor classification system.
 
-It is built to support a local backend at `http://localhost:8000/api` and render the full workflow:
+It is designed to do four simple things:
+- upload one MRI image
+- show the current workflow step
+- show the result clearly
+- keep the extra details available when needed
 
-- upload MRI scan
-- show live workflow stages
-- render the report in readable sections
-- surface model votes and case details
+## What You See
+
+- upload card
+- live step tracker
+- result summary
+- model votes
+- image signals
+- optional sources and checks
 
 ## Local Run
 
@@ -19,7 +27,6 @@ npm run dev
 ```
 
 Open:
-
 - `http://localhost:3000`
 
 ## Environment
@@ -32,14 +39,15 @@ NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
 
 ```mermaid
 flowchart LR
-  A[Upload panel] --> B[Workflow graph]
-  B --> C[Report panel]
-  C --> D[Case review]
+  A[Upload MRI image] --> B[Show live step]
+  B --> C[Show result]
+  C --> D[Show model votes]
+  C --> E[Show source details]
 ```
 
 ## Notes
 
-- The frontend expects the backend to be running locally on port `8000`.
-- If the backend is not available, uploads will fail.
-- The UI is intentionally compact and clinical, not marketing-oriented.
+- The frontend expects the backend to be running on port `8000` during local development.
+- The wording in the UI is intentionally plain and direct.
+- The layout is meant to be clear and readable, not flashy.
 

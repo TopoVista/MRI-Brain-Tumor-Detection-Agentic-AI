@@ -1,6 +1,6 @@
 # Dataset
 
-This directory contains the local MRI dataset used for experimentation and future training.
+This folder contains the local brain MRI dataset used for experimentation and model training.
 
 ## Structure
 
@@ -33,12 +33,6 @@ datasets/
       pituitary/
 ```
 
-## Purpose
-
-- `Training/` is used for future model training or offline experimentation.
-- `Testing/` is useful for validation and demo cases.
-- The current app can run without reading this folder at runtime, but the dataset is kept for reproducibility and training work.
-
 ## Class Labels
 
 - `glioma`
@@ -46,11 +40,19 @@ datasets/
 - `notumor`
 - `pituitary`
 
+## Purpose
+
+- `Training/` is used for model training and experimentation.
+- `Testing/` is used for evaluation and demo checks.
+- The app does not read this folder at runtime unless you are retraining.
+
 ## Source
 
 - Imported locally from `C:\Users\KIIT0001\Desktop\marksheets\archive`
 
-## Recommendation
+## Notes
 
-If you extend the training scripts later, keep any metadata or preprocessing helpers alongside `scripts/` or `docs/` so the raw dataset folders stay clean.
+- Keep the raw dataset folders clean.
+- Put any preprocessing helpers or training notes in `scripts/` or `docs/`.
+- The class list here matches the four classes used by the app.
 

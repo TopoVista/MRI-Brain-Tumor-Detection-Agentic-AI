@@ -28,8 +28,8 @@ export function AgentTracePanel({ result, traces }: { result: AnalysisResponse |
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Execution trace</CardTitle>
-        <CardDescription>Compact audit trail of each stage.</CardDescription>
+        <CardTitle>Workflow steps</CardTitle>
+        <CardDescription>Each step the app ran.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {traceEntries.length ? (
@@ -54,7 +54,7 @@ export function AgentTracePanel({ result, traces }: { result: AnalysisResponse |
           })
         ) : (
           <div className="rounded-lg border border-dashed border-border bg-secondary p-6 text-sm leading-7 text-slate-300">
-            Run an upload to inspect stage handoffs.
+            Run an upload to see the steps.
           </div>
         )}
       </CardContent>

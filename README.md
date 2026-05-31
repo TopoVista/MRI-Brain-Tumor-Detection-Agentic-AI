@@ -1,63 +1,65 @@
-# Agentic MRI Analysis Copilot
+# Brain MRI Tumor Classification and Analysis System
 
-An MRI brain tumor analysis platform built for local development first.
+A full-stack brain MRI application that uploads a scan, runs four model votes, combines the result, and shows a plain summary with the main details in one place.
 
-The project pairs a Next.js UI with a FastAPI backend and a multi-agent workflow:
-- four algorithm agents classify the scan
-- one orchestration agent combines the votes
-- optional support agents add retrieval, reporting, and verification when enabled
-
-The default local setup is lightweight, CPU-friendly, and designed to run end to end on `localhost`.
-
-## Overview
-
-```mermaid
-flowchart TD
-  A[Upload MRI] --> B[Preprocess]
-  B --> C[CNN agent]
-  C --> D[ResNet-50 agent]
-  D --> E[VGG16 agent]
-  E --> F[Inception V3 agent]
-  F --> G[Orchestration agent]
-  G --> H[Clinical report]
-  G --> I[Case memory]
-```
+The project is built around two practical modes:
+- `Local mode`: runs end to end on your machine with the ONNX models in `artifacts/models/`
+- `Hosted mode`: runs on Vercel + Render and falls back safely if the model files are not available
 
 ## What It Does
 
 - uploads a brain MRI image from the browser
-- preprocesses the image on CPU
-- runs four algorithm agents:
+- preprocesses the image
+- runs four model votes:
   - CNN
   - ResNet-50
   - VGG16
   - Inception V3
-- combines their votes with an orchestration agent
-- optionally generates grounded support output
-- stores the result locally for later review
+- combines those votes into one final class
+- shows the result with confidence, class probabilities, and a plain summary
+- can also show extra steps such as source lookup, report text, checks, and saved case history
 
-This is decision support software, not an autonomous diagnosis tool.
+The predicted classes are:
+
+- `glioma`
+- `meningioma`
+- `notumor`
+- `pituitary`
+
+## System Flow
+
+```mermaid
+flowchart TD
+  A[Upload MRI image] --> B[Preprocess image]
+  B --> C[CNN vote]
+  C --> D[ResNet-50 vote]
+  D --> E[VGG16 vote]
+  E --> F[Inception V3 vote]
+  F --> G[Combine votes]
+  G --> H[Show result]
+  G --> I[Optional extra steps]
+```
 
 ## Repository Layout
 
 ```mermaid
 flowchart LR
-  A[frontend/] --> B[Next.js app]
-  C[backend/] --> D[FastAPI workflow engine]
-  E[datasets/] --> F[Local sample MRI data]
-  G[docs/] --> H[Architecture and setup]
-  I[artifacts/] --> J[Trained models and logs]
+  A[frontend/] --> B[Next.js user interface]
+  C[backend/] --> D[FastAPI API and workflow]
+  E[datasets/] --> F[Local dataset notes]
+  G[artifacts/] --> H[Models and logs]
+  I[docs/] --> J[Architecture and setup]
 ```
 
 ## Local Setup
 
-### Prerequisites
+### Requirements
 
 - Python 3.11
-- Node.js 18+ 
+- Node.js 18+
 - npm
 
-### 1. Backend
+### Backend
 
 ```powershell
 cd backend
@@ -68,7 +70,7 @@ copy .env.example .env
 uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
-### 2. Frontend
+### Frontend
 
 ```powershell
 cd frontend
@@ -77,68 +79,53 @@ copy .env.local.example .env.local
 npm run dev
 ```
 
-### 3. Open the app
-
+Open:
 - Frontend: `http://localhost:3000`
 - Backend health: `http://localhost:8000/api/health`
 
-## Local Workflow
-
-```mermaid
-sequenceDiagram
-  participant U as User
-  participant F as Frontend
-  participant B as Backend
-  participant M as Model agents
-  participant R as Report output
-
-  U->>F: Upload MRI image
-  F->>B: POST /api/analysis/upload-stream
-  B->>M: Preprocess + run four agents
-  M->>B: Votes and confidence
-  B->>R: Assemble report and case data
-  B->>F: Stream stage updates + final result
-  F->>U: Render workflow and report
-```
-
-## Local Configuration
-
-### Frontend
-
-`frontend/.env.local` should point to your local backend:
-
-```env
-NEXT_PUBLIC_API_BASE_URL=http://localhost:8000/api
-```
-
-### Backend
-
-`backend/.env` is configured for local development by default. The main things to know:
-
-- ONNX model paths point to `artifacts/models/`
-- Cloudinary is optional
-- OpenAI/Gemini/Groq are optional
-- the app can fall back to local demo logic if the model files are missing
-
-## Data And Models
-
-The dataset used for experiments lives in `datasets/brain-tumor-mri/`.
+## Local vs Hosted Behavior
 
 ```mermaid
 flowchart TD
-  A[datasets/brain-tumor-mri] --> B[Training]
-  A --> C[Testing]
-  B --> D[glioma]
-  B --> E[meningioma]
-  B --> F[notumor]
-  B --> G[pituitary]
-  C --> D
-  C --> E
-  C --> F
-  C --> G
+  A[Local machine] --> B[Uses local ONNX files]
+  C[Vercel/Render] --> D[Uses real models if available]
+  C --> E[Falls back safely if models are missing]
 ```
 
-The trained ONNX exports live in `artifacts/models/`:
+- Local development is set up to use the four real models.
+- Hosted deployments can still work without the model files, which keeps the app usable for a demo.
+- If the model files are present, the same UI shows the real model votes.
+
+## Frontend
+
+The frontend lives in `frontend/` and is a Next.js app.
+
+It shows:
+- the upload panel
+- the live workflow steps
+- the result summary
+- the model votes
+- the image signals
+- the case details
+
+More details:
+- [Frontend README](frontend/README.md)
+
+## Dataset
+
+The local dataset is stored under `datasets/brain-tumor-mri/`.
+
+More details:
+- [Dataset README](datasets/README.md)
+
+## Architecture
+
+More details:
+- [Architecture notes](docs/architecture.md)
+
+## Models
+
+The trained ONNX files are expected in `artifacts/models/`:
 
 - `cnn.onnx`
 - `resnet50.onnx`
@@ -147,14 +134,8 @@ The trained ONNX exports live in `artifacts/models/`:
 
 ## Notes
 
-- The backend keeps uploads in `storage/uploads/` by default if Cloudinary is not configured.
-- The app is intentionally CPU-first so it can run locally without a GPU.
-- If you want the strict four-model path, ensure the ONNX exports exist and point the backend env to them.
-
-## More Docs
-
-- [Architecture](docs/architecture.md)
-- [Deployment](docs/deployment.md)
-- [Dataset notes](datasets/README.md)
-- [Frontend notes](frontend/README.md)
+- This is decision support software, not an autonomous diagnosis system.
+- The backend stores uploads locally in development.
+- Cloudinary can be used for remote upload storage if configured.
+- The optional extra workflow steps are still available, but the main path stays focused on upload, preprocess, vote, and combine.
 

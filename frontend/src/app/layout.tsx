@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Agentic MRI Analysis Copilot",
-  description: "AI-assisted MRI analysis with CPU inference, retrieval grounding, and verification.",
+  title: "Brain MRI Tumor Classification",
+  description: "Upload a brain MRI and get a four-class prediction, model votes, and a plain result summary.",
 };
 
 export default function RootLayout({

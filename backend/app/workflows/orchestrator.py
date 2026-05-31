@@ -307,7 +307,9 @@ def _initial_state(filename: str, content: bytes, workflow_mode: str) -> Workflo
 
 
 def _paper_core_is_strict() -> bool:
-    # Strict mode is opt-in so free deployments can fall back cleanly when weights are absent.
+    env = settings.app_env.lower()
+    if env in {"development", "local", "test"}:
+        return True
     return settings.strict_paper_core and inference_service.has_configured_weights()
 
 

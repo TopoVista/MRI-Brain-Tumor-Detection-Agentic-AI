@@ -8,40 +8,40 @@ type SectionBlock = {
 };
 
 const SECTION_HELPERS: Record<string, string> = {
-  Impression: "Plain-language interpretation of what the system thinks this scan most likely represents.",
-  "Model Consensus": "How the different algorithm agents voted, and whether they agreed with each other.",
-  "Evidence Signals": "Supporting numeric image signals and literature grounding used to keep the summary anchored.",
-  Recommendation: "Suggested next steps for review, follow-up, and safe use of the AI output.",
+  Impression: "Plain answer from the system.",
+  "Model Consensus": "How the four model votes compare.",
+  "Evidence Signals": "Simple image measurements and supporting sources.",
+  Recommendation: "What to do next.",
 };
 
 const JARGON_HELPERS: Array<{ pattern: RegExp; helper: string }> = [
   {
     pattern: /^Ensemble confidence:/i,
-    helper: "This is the combined confidence after all models are weighted together, not a guarantee that the prediction is correct.",
+    helper: "This is the combined confidence after all models are combined.",
   },
   {
     pattern: /^Mean intensity:/i,
-    helper: "A basic brightness average across the processed image. On its own, it is not diagnostic.",
+    helper: "A basic brightness average across the processed image.",
   },
   {
     pattern: /^Intensity variability:/i,
-    helper: "Measures how much the image brightness changes across the scan. Higher variation can reflect more visual complexity.",
+    helper: "Measures how much the image brightness changes across the scan.",
   },
   {
     pattern: /^High signal ratio:/i,
-    helper: "Estimates how much of the image contains brighter-than-usual signal. It is only a crude imaging feature.",
+    helper: "Estimates how much of the image is brighter than average.",
   },
   {
     pattern: /^Edge density:/i,
-    helper: "A simple estimate of how many sharp boundaries or structural edges appear in the image.",
+    helper: "A simple estimate of how many sharp boundaries appear in the image.",
   },
   {
     pattern: /^Model votes:/i,
-    helper: "The individual model outputs are shown below so you can see whether the ensemble decision came from agreement or disagreement.",
+    helper: "The individual model outputs are shown below.",
   },
   {
     pattern: /^Note:/i,
-    helper: "This is a caution from the system explaining why the result may be less reliable.",
+    helper: "This is a caution explaining why the result may be less reliable.",
   },
 ];
 
@@ -105,7 +105,7 @@ function renderSegments(content: string) {
 function previewText(section: SectionBlock) {
   const firstParagraph = section.items.find((item) => item.type === "paragraph")?.content;
   const firstBullet = section.items.find((item) => item.type === "bullet")?.content;
-  return firstParagraph ?? firstBullet ?? "Open for more detail.";
+  return firstParagraph ?? firstBullet ?? "Open for details.";
 }
 
 function defaultOpen(title: string) {
@@ -132,9 +132,7 @@ export function MarkdownReport({ content }: MarkdownReportProps) {
                   <p className="mt-2 text-xs leading-5 text-slate-400">{SECTION_HELPERS[section.title]}</p>
                 ) : null}
               </div>
-              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300 transition group-open:rotate-180">
-                ▼
-              </div>
+              <div className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-sky-300 transition group-open:rotate-180">▼</div>
             </div>
           </summary>
 

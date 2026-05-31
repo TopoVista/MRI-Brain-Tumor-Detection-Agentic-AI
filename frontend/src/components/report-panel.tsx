@@ -25,7 +25,7 @@ function workflowModeTone(result: AnalysisResponse) {
 }
 
 function workflowModeLabel(result: AnalysisResponse) {
-  return result.workflow_mode === "extended_support" ? (result.verified ? "Verified" : "Review") : "Core mode";
+  return result.workflow_mode === "extended_support" ? (result.verified ? "Checked" : "Needs review") : "Core mode";
 }
 
 function formatPrediction(prediction: AnalysisResponse["prediction"]) {
@@ -37,26 +37,26 @@ function formatPrediction(prediction: AnalysisResponse["prediction"]) {
 
 function confidenceNarrative(confidence: number) {
   if (confidence >= 0.8) return "The models are fairly aligned, so the system is more comfortable with this output.";
-  if (confidence >= 0.6) return "This is a moderate-confidence result, so it can help triage but still needs clinician review.";
-  return "This is a low-confidence result, which usually means the models disagreed or the image signals were weak.";
+  if (confidence >= 0.6) return "This is a moderate-confidence result, so it can help with review but still needs clinician review.";
+  return "This is a low-confidence result, which usually means the models did not agree or the image signals were weak.";
 }
 
 function triageNarrative(severityBand: AnalysisResponse["severity_band"]) {
-  if (severityBand === "high") return "The system sees a stronger signal for urgent specialist review.";
-  if (severityBand === "moderate") return "The scan should be reviewed soon, but the output is not by itself an emergency finding.";
-  return "This reads as a lower-priority AI signal, but it still requires proper clinical interpretation.";
+  if (severityBand === "high") return "The system suggests faster specialist review.";
+  if (severityBand === "moderate") return "The scan should be reviewed soon, but the output is not an emergency on its own.";
+  return "This is a lower-priority result, but it still needs proper review.";
 }
 
 function reviewHeadline(result: AnalysisResponse) {
   if (result.prediction === "notumor") {
     return result.confidence >= 0.7
-      ? "The system leans away from a tumor pattern, but this still is not a diagnosis."
-      : "The system leans away from a tumor pattern, but uncertainty is high.";
+      ? "The system leans toward no tumor, but this is still not a diagnosis."
+      : "The system leans toward no tumor, but the result is still uncertain.";
   }
 
   return result.confidence >= 0.7
-    ? `The system most strongly favors a ${result.tumor_profile.display_name.toLowerCase()} pattern.`
-    : `The system tentatively favors a ${result.tumor_profile.display_name.toLowerCase()} pattern, but the evidence is mixed.`;
+    ? `The system most strongly favors a ${result.tumor_profile.display_name.toLowerCase()} result.`
+    : `The system tentatively favors a ${result.tumor_profile.display_name.toLowerCase()} result, but the evidence is mixed.`;
 }
 
 function strongestVote(votes: ModelVote[]) {
@@ -68,11 +68,11 @@ function normalizeVerifierNotes(notes: string[] | undefined, workflowMode: Analy
   if (cleaned.length) return cleaned;
   return workflowMode === "paper_core"
     ? [
-        "Core mode does not execute the optional verifier agent by default.",
-        "This result comes directly from preprocessing, the four model agents, and orchestration.",
-        "If you need safety review and literature grounding, use the extended support workflow.",
+        "Core mode does not run the extra checks by default.",
+        "This result comes directly from image prep, the four model votes, and the final combination step.",
+        "If you need source lookup and extra checks, use the full workflow.",
       ]
-    : ["No verifier notes were returned for this run."];
+    : ["No check notes were returned for this run."];
 }
 
 function normalizeModelVotes(votes: ModelVote[] | undefined) {
@@ -246,35 +246,35 @@ export function ReportPanel({
             {workflowModeLabel(result)}
           </span>
         </div>
-        <CardDescription>Confidence-calibrated support summary.</CardDescription>
+        <CardDescription>Plain result summary.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-5 p-6">
         <div className="rounded-lg border border-border bg-secondary p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">What this means</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Summary</p>
           <h3 className="mt-3 text-xl font-semibold text-white sm:text-2xl">{reviewHeadline(result)}</h3>
           <p className="mt-3 max-w-4xl text-sm leading-6.5 text-slate-300">
             {confidenceNarrative(result.confidence)} {triageNarrative(result.severity_band)}
           </p>
           <div className="mt-5 grid gap-3 lg:grid-cols-3">
             <div className="rounded-md border border-border bg-card px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">AI impression</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Prediction</p>
               <p className="mt-2 text-base font-semibold text-white">{formatPrediction(result.prediction)}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-400">This is the main pattern the ensemble currently favors.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">This is the class the model votes currently favor.</p>
             </div>
             <div className="rounded-md border border-border bg-card px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Confidence guide</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Confidence</p>
               <p className="mt-2 text-base font-semibold text-white">{Math.round(result.confidence * 100)}% confidence</p>
-              <p className="mt-2 text-sm leading-6 text-slate-400">Lower values mean the models are less aligned and the AI signal is weaker.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-400">Lower values mean the model votes are less aligned.</p>
             </div>
             <div className="rounded-md border border-border bg-card px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Best next step</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Next step</p>
               <p className="mt-2 text-base font-semibold text-white">{result.recommended_actions[0] ?? "Radiologist review recommended."}</p>
             </div>
           </div>
           <p className="mt-4 text-xs uppercase tracking-[0.18em] text-slate-400">
             {result.workflow_mode === "extended_support"
-              ? "Extended support mode adds retrieval, report generation, verification, and memory after the core classifier path."
-              : "Core mode runs preprocessing, the four model agents, and orchestration. Extra support agents are optional."}
+              ? "Full workflow adds source lookup, report writing, checks, and case saving after the main model path."
+              : "Core mode runs image prep, the four model votes, and the final combination step. Extra steps are optional."}
           </p>
         </div>
 
@@ -285,12 +285,12 @@ export function ReportPanel({
             <Progress className="mt-4" value={result.confidence * 100} />
           </div>
           <div className="rounded-lg border border-border bg-card px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/68">Triage band</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/68">Priority</p>
             <p className="mt-3 text-3xl font-semibold capitalize text-white">{result.severity_band}</p>
-            <p className="mt-3 text-sm leading-6 text-slate-400">Triage-oriented signal.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">A simple priority label for review.</p>
           </div>
           <div className="rounded-lg border border-border bg-card px-4 py-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/68">Image storage</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.22em] text-sky-200/68">Image file</p>
             <p className="mt-3 text-sm font-medium leading-6 text-white">{fileNameFromPath(result.image_url)}</p>
             <details className="mt-3 rounded-md border border-border bg-[rgba(9,17,28,0.88)] px-3 py-2">
               <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.18em] text-sky-300">Show full path</summary>
@@ -304,10 +304,10 @@ export function ReportPanel({
         <div className="rounded-lg border border-border bg-secondary p-5">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-sky-300" />
-            <h3 className="font-semibold text-white">Generated report</h3>
+            <h3 className="font-semibold text-white">Report</h3>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            The first sections are kept readable for quick review. Expand any section to see the more technical reasoning behind it.
+            The first sections are kept short for quick review. Open any section for more detail.
           </p>
           <div className="mt-5 rounded-lg border border-border bg-card p-5">
             <MarkdownReport content={result.report} />
@@ -318,9 +318,9 @@ export function ReportPanel({
           <div className="rounded-lg border border-border bg-card p-4.5">
             <div className="flex items-center gap-2">
               <Microscope className="h-4 w-4 text-sky-300" />
-              <h3 className="font-semibold text-white">Findings</h3>
+              <h3 className="font-semibold text-white">Image signals</h3>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-400">Short machine-derived observations that support the result.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">Short image measurements that support the result.</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
               {result.findings.map((finding) => (
                 <li key={finding} className="rounded-md border border-border bg-secondary px-4 py-3">
@@ -332,9 +332,9 @@ export function ReportPanel({
           <div className="rounded-lg border border-border bg-card p-4.5">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-sky-300" />
-              <h3 className="font-semibold text-white">Verifier notes</h3>
+              <h3 className="font-semibold text-white">Checks</h3>
             </div>
-            <p className="mt-3 text-sm leading-6 text-slate-400">Safety checks that explain whether the final note is trustworthy enough to surface as support output.</p>
+            <p className="mt-3 text-sm leading-6 text-slate-400">Checks that explain whether the result is ready to show.</p>
             <ul className="mt-4 space-y-3 text-sm leading-6 text-slate-300">
               {verifierNotes.map((note) => (
                 <li key={note} className="flex items-start gap-3 rounded-md border border-border bg-secondary px-4 py-3">
@@ -354,7 +354,7 @@ export function ReportPanel({
           <div className="rounded-lg border border-border bg-card p-4.5">
             <div className="flex items-center gap-2">
               <Microscope className="h-4 w-4 text-sky-300" />
-              <h3 className="font-semibold text-white">Tumor classification</h3>
+              <h3 className="font-semibold text-white">Class probabilities</h3>
             </div>
             <div className="mt-4 space-y-3">
               {result.class_probabilities.map((item) => (
@@ -375,13 +375,13 @@ export function ReportPanel({
           <div className="rounded-lg border border-border bg-card p-4.5">
             <div className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4 text-sky-300" />
-              <h3 className="font-semibold text-white">Consensus and next actions</h3>
+              <h3 className="font-semibold text-white">Agreement and next steps</h3>
             </div>
             <div className="mt-4 rounded-md border border-border bg-secondary px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Consensus strength</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Agreement level</p>
               <p className="mt-2 text-lg font-semibold capitalize text-white">{result.consensus_summary.strength}</p>
               <p className="mt-1 text-sm text-slate-400">
-                Margin vs runner-up class: {Math.round(result.consensus_summary.margin * 100)}%
+                Gap to the next class: {Math.round(result.consensus_summary.margin * 100)}%
               </p>
             </div>
             <div className="mt-4 grid gap-3 md:grid-cols-3">
@@ -406,7 +406,7 @@ export function ReportPanel({
         <div className="rounded-lg border border-border bg-card p-4.5">
           <div className="flex items-center gap-2">
             <FileText className="h-4 w-4 text-sky-300" />
-            <h3 className="font-semibold text-white">Tumor profile</h3>
+          <h3 className="font-semibold text-white">Class details</h3>
           </div>
           <div className="mt-4 grid gap-4 lg:grid-cols-[0.85fr_1.15fr]">
             <div className="rounded-md border border-border bg-secondary px-4 py-4">
@@ -416,7 +416,7 @@ export function ReportPanel({
               <p className="mt-4 text-sm leading-7 text-slate-300">{result.tumor_profile.summary}</p>
             </div>
             <div className="rounded-md border border-border bg-secondary px-4 py-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">Clinical considerations</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200/68">What to look at</p>
               <ul className="mt-3 space-y-3 text-sm leading-6 text-slate-300">
                 {result.tumor_profile.common_considerations.map((item) => (
                   <li key={item} className="rounded-md border border-border bg-card px-4 py-3">
@@ -431,10 +431,10 @@ export function ReportPanel({
         <div className="rounded-lg border border-border bg-card p-4.5">
           <div className="flex items-center gap-2">
             <Microscope className="h-4 w-4 text-sky-300" />
-            <h3 className="font-semibold text-white">Algorithm agents</h3>
+            <h3 className="font-semibold text-white">Model votes</h3>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-400">
-            These are the four models behind the ensemble. {strongestModel ? `The strongest single vote came from ${strongestModel.agent.replaceAll("_", " ")} at ${Math.round(strongestModel.confidence * 100)}%.` : "Live per-model vote data was not returned, so the cards below show the expected agent lineup."}
+            These are the four model votes behind the result. {strongestModel ? `The strongest single vote came from ${strongestModel.agent.replaceAll("_", " ")} at ${Math.round(strongestModel.confidence * 100)}%.` : "Live per-model vote data was not returned, so the cards below show the expected model lineup."}
           </p>
           <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
             {displayedModelVotes.map((vote) => {

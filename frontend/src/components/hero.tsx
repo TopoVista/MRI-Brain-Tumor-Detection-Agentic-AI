@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AnalysisResponse } from "@/lib/types";
 
 function currentRunLabel(result: AnalysisResponse | null, isUploading: boolean) {
-  if (isUploading) return "Workflow in progress";
-  if (!result) return "Awaiting MRI upload";
+  if (isUploading) return "Processing image";
+  if (!result) return "Waiting for an MRI upload";
   return `Latest result: ${result.prediction.replace("-", " ")}`;
 }
 
@@ -15,12 +15,12 @@ export function Hero({ result, isUploading }: { result: AnalysisResponse | null;
       <CardContent className="grid gap-5 p-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(440px,1fr)] lg:items-start">
         <div className="space-y-4">
           <div className="space-y-2.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/68">MRI Brain Tumor Copilot</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-200/68">Brain MRI Tumor Classification</p>
             <h1 className="hero-title max-w-4xl text-3xl text-white sm:text-4xl xl:text-[3rem]">
-              Brain MRI analysis for multi-model classification and structured clinical review.
+              Brain MRI classification with model votes, confidence, and a plain summary.
             </h1>
             <p className="max-w-3xl text-sm leading-6.5 text-slate-300 sm:text-base">
-              Upload a scan, follow the active agent path as it executes, and review one clear support note designed for clinical reading rather than demo presentation.
+              Upload a scan, run the four model votes, and read a short result summary with the main details in one place.
             </p>
           </div>
 
@@ -39,10 +39,10 @@ export function Hero({ result, isUploading }: { result: AnalysisResponse | null;
           <div className="rounded-md border border-border bg-secondary px-4 py-4">
             <div className="flex items-center gap-2 text-sky-300">
               <Workflow className="h-4 w-4" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em]">Workflow</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em]">Steps</p>
             </div>
-            <p className="mt-3 text-base font-semibold text-white">Single review path</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">One workspace for intake, agent execution state, and final review.</p>
+            <p className="mt-3 text-base font-semibold text-white">One upload path</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">One workspace for upload, processing, and the final result.</p>
           </div>
 
           <div className="rounded-md border border-border bg-secondary px-4 py-4">
@@ -50,17 +50,17 @@ export function Hero({ result, isUploading }: { result: AnalysisResponse | null;
               <BrainCircuit className="h-4 w-4" />
               <p className="text-xs font-semibold uppercase tracking-[0.18em]">Models</p>
             </div>
-            <p className="mt-3 text-base font-semibold text-white">Four-class ensemble</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Glioma, meningioma, pituitary, and no-tumor classification.</p>
+            <p className="mt-3 text-base font-semibold text-white">Four-label result</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">The app predicts glioma, meningioma, pituitary, or no tumor.</p>
           </div>
 
           <div className="rounded-md border border-border bg-secondary px-4 py-4">
             <div className="flex items-center gap-2 text-sky-300">
               <ShieldCheck className="h-4 w-4" />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em]">Safety</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em]">Extra steps</p>
             </div>
-            <p className="mt-3 text-base font-semibold text-white">Core workflow first</p>
-            <p className="mt-2 text-sm leading-6 text-slate-400">Verification and literature support remain optional extended workflow layers.</p>
+            <p className="mt-3 text-base font-semibold text-white">Core steps first</p>
+            <p className="mt-2 text-sm leading-6 text-slate-400">Source lookup and result checks are optional extra steps.</p>
           </div>
         </div>
       </CardContent>

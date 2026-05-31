@@ -134,7 +134,7 @@ function WorkflowStatusStrip({
 
 function rowConnectorLabel(index: number, total: number) {
   if (index >= total - 1) return null;
-  return "Continue to next stage group";
+  return "Next step group";
 }
 
 export function WorkflowGraph({
@@ -157,11 +157,11 @@ export function WorkflowGraph({
   return (
     <Card>
       <CardHeader className="border-b border-border">
-        <CardTitle>Workflow architecture</CardTitle>
+        <CardTitle>Workflow steps</CardTitle>
         <CardDescription>
           {workflowMode === "extended_support"
-            ? "Extended mode includes retrieval, report generation, verification, and memory after the core classifier path."
-            : "Default core mode runs preprocessing, the four algorithm agents, and the orchestration agent only."}
+            ? "This mode adds source lookup, report writing, checks, and case saving after the main model path."
+            : "This mode runs upload, image prep, the four model votes, and the final combination step."}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 p-6">
@@ -170,10 +170,10 @@ export function WorkflowGraph({
         <div className="rounded-md border border-border bg-secondary p-4 lg:p-5">
           <div className="mb-4">
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200/68">
-              {workflowMode === "extended_support" ? "Extended workflow" : "Core workflow"}
+              {workflowMode === "extended_support" ? "Full workflow" : "Core workflow"}
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-300">
-              The path below follows the actual execution order. Optional support agents only appear when the backend is running in extended mode.
+              The path below shows the order the app follows. Extra steps only appear in the full workflow.
             </p>
           </div>
 
@@ -181,7 +181,7 @@ export function WorkflowGraph({
             {rows.map((row, rowIndex) => (
               <div key={rowIndex} className="space-y-4">
                 <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-                  <span>Stage group {rowIndex + 1}</span>
+                  <span>Step group {rowIndex + 1}</span>
                   <div className="h-px flex-1 bg-border" />
                 </div>
                 <div className={cn("grid gap-3", row.length === 4 ? "xl:grid-cols-[repeat(4,minmax(0,1fr))]" : "xl:grid-cols-[repeat(3,minmax(0,1fr))]", "md:grid-cols-[repeat(2,minmax(0,1fr))]")}>
