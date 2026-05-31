@@ -1,5 +1,3 @@
-from openai import OpenAI
-
 from app.core.config import get_settings
 from app.core.logging import get_logger
 
@@ -43,6 +41,8 @@ def _generate_with_openai(
 ) -> str | None:
     if settings.llm_provider != "openai" or not settings.openai_api_key:
         return None
+
+    from openai import OpenAI
 
     client = OpenAI(api_key=settings.openai_api_key)
     prompt = _build_prompt(

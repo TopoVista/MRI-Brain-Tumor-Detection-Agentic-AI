@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", alias="APP_ENV")
     api_prefix: str = Field(default="/api", alias="API_PREFIX")
     strict_paper_core: bool = Field(default=False, alias="STRICT_PAPER_CORE")
+    seed_knowledge_base_on_startup: bool = Field(default=False, alias="SEED_KNOWLEDGE_BASE_ON_STARTUP")
     jwt_secret: str = Field(default="change-me", alias="JWT_SECRET")
     jwt_expire_minutes: int = Field(default=120, alias="JWT_EXPIRE_MINUTES")
     sqlite_path: str = Field(default="storage/mri_copilot.db", alias="SQLITE_PATH")

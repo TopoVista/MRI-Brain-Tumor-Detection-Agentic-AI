@@ -6,7 +6,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import analysis, auth, health
 from app.core.config import get_settings
 from app.memory.bootstrap import bootstrap_storage
-from app.rag.seed import seed_knowledge_base
 
 
 settings = get_settings()
@@ -15,7 +14,10 @@ settings = get_settings()
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     bootstrap_storage()
-    seed_knowledge_base()
+    if settings.seed_knowledge_base_on_startup:
+        from app.rag.seed import seed_knowledge_base
+
+        seed_knowledge_base()
     yield
 
 

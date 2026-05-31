@@ -2,9 +2,6 @@ from typing import Callable, TypedDict
 from uuid import uuid4
 
 from app.agents.mri_agent import run_model_agent, run_orchestration_agent, run_preprocessing_agent
-from app.agents.report_agent import run_report_agent
-from app.agents.retrieval_agent import run_retrieval_agent
-from app.agents.verifier_agent import run_verifier_agent
 from app.schemas.analysis import AgentTrace, AnalysisResponse, ClassProbability, ConsensusSummary, ModelVote, TumorProfile
 from app.services.case_repository import save_case
 from app.core.config import get_settings
@@ -86,6 +83,8 @@ def orchestration_node(state: WorkflowState) -> WorkflowState:
 
 
 def retrieval_node(state: WorkflowState) -> WorkflowState:
+    from app.agents.retrieval_agent import run_retrieval_agent
+
     citations = run_retrieval_agent(state["prediction"], state["features"])
     state["citations"] = citations
     detail = "Retrieved literature support." if citations else "No literature found, continuing with evidence-free extended report."
@@ -98,6 +97,8 @@ def retrieval_node(state: WorkflowState) -> WorkflowState:
 
 
 def report_node(state: WorkflowState) -> WorkflowState:
+    from app.agents.report_agent import run_report_agent
+
     result = run_report_agent(
         state["prediction"],
         state["confidence"],
@@ -114,6 +115,8 @@ def report_node(state: WorkflowState) -> WorkflowState:
 
 
 def verifier_node(state: WorkflowState) -> WorkflowState:
+    from app.agents.verifier_agent import run_verifier_agent
+
     result = run_verifier_agent(
         state["prediction"],
         state["confidence"],

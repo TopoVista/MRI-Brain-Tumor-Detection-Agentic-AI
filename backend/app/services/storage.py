@@ -2,10 +2,6 @@ import base64
 from pathlib import Path
 from uuid import uuid4
 
-import cloudinary
-import cloudinary.uploader
-from cloudinary.exceptions import Error as CloudinaryError
-
 from app.core.config import get_settings
 from app.core.logging import get_logger
 
@@ -15,6 +11,8 @@ logger = get_logger(__name__)
 
 
 def _configure_cloudinary() -> bool:
+    import cloudinary
+
     if not all(
         [
             settings.cloudinary_cloud_name,
@@ -35,6 +33,9 @@ def _configure_cloudinary() -> bool:
 def store_scan(case_id: str, filename: str, content: bytes) -> str:
     if _configure_cloudinary():
         try:
+            import cloudinary.uploader
+            from cloudinary.exceptions import Error as CloudinaryError
+
             result = cloudinary.uploader.upload(
                 "data:image/png;base64," + base64.b64encode(content).decode("utf-8"),
                 folder="mri-copilot",

@@ -1,8 +1,7 @@
 import math
 from collections import Counter
 
-from chromadb import PersistentClient
-from chromadb.api.types import EmbeddingFunction, Documents
+from chromadb.api.types import Documents, EmbeddingFunction
 
 from app.core.config import get_settings
 
@@ -42,6 +41,8 @@ class LocalHashEmbeddingFunction(EmbeddingFunction[Documents]):
 
 
 def get_collection():
+    from chromadb import PersistentClient
+
     settings.chroma_dir.mkdir(parents=True, exist_ok=True)
     client = PersistentClient(path=str(settings.chroma_dir))
     embedding_fn = LocalHashEmbeddingFunction()

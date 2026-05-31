@@ -3,7 +3,6 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 import numpy as np
-import onnxruntime as ort
 import requests
 from PIL import Image
 
@@ -33,7 +32,7 @@ class ModelInferenceResult:
 
 class MultiModelInferenceService:
     def __init__(self) -> None:
-        self._sessions: dict[str, ort.InferenceSession] = {}
+        self._sessions: dict[str, object] = {}
         self._downloaded_paths: dict[str, Path] = {}
 
     def has_configured_weights(self) -> bool:
@@ -69,7 +68,9 @@ class MultiModelInferenceService:
             return settings.model_path
         return None
 
-    def _get_session(self, agent: str, strict: bool = False) -> ort.InferenceSession | None:
+    def _get_session(self, agent: str, strict: bool = False):
+        import onnxruntime as ort
+
         model_path = self._resolve_model_path(agent)
         if model_path is None:
             if strict:
