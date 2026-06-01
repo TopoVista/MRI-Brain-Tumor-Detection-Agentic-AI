@@ -1,14 +1,21 @@
 import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
+import { WorkflowRunMode, workflowRunModeToWorkflowMode } from "@/lib/workflow";
 
 const baseUrl =
   process.env.NEXT_PUBLIC_API_BASE_URL ??
   (process.env.NODE_ENV === "production" ? "/api" : "http://localhost:8000/api");
 
-export async function uploadMri(file: File): Promise<AnalysisResponse> {
+function uploadPath(mode: WorkflowRunMode) {
+  return workflowRunModeToWorkflowMode(mode) === "extended_support" ? "/analysis/upload-stream-extended" : "/analysis/upload-stream";
+}
+
+export async function uploadMri(file: File, mode: WorkflowRunMode = "core"): Promise<AnalysisResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${baseUrl}/analysis/upload`, {
+  const path = workflowRunModeToWorkflowMode(mode) === "extended_support" ? "/analysis/upload-extended" : "/analysis/upload";
+
+  const response = await fetch(`${baseUrl}${path}`, {
     method: "POST",
     body: formData,
   });
@@ -29,11 +36,15 @@ type UploadStreamHandlers = {
   onModelVotes?: (votes: ModelVote[]) => void;
 };
 
-export async function uploadMriStream(file: File, handlers: UploadStreamHandlers = {}): Promise<AnalysisResponse> {
+export async function uploadMriStream(
+  file: File,
+  handlers: UploadStreamHandlers = {},
+  mode: WorkflowRunMode = "core"
+): Promise<AnalysisResponse> {
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await fetch(`${baseUrl}/analysis/upload-stream`, {
+  const response = await fetch(`${baseUrl}${uploadPath(mode)}`, {
     method: "POST",
     body: formData,
   });

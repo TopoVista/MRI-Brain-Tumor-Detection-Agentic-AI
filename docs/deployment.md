@@ -10,6 +10,10 @@ This is the production-oriented deployment setup for the project:
 
 The goal is to keep the system affordable, always available, and still CPU-friendly.
 
+The app supports two workflow types in both local and hosted setups:
+- `Core mode`: upload, preprocess, run the four model votes, combine the result
+- `Full workflow`: core mode plus source lookup, report text, checks, and case saving
+
 ## Architecture
 
 ```mermaid
@@ -40,6 +44,7 @@ flowchart TD
   - four model votes
   - combine votes
   - show the result
+- keeps the full workflow optional so the default route stays lighter
 
 ## 1. Backend on a VPS
 
@@ -234,10 +239,14 @@ Approximate monthly cost:
 6. Set `NEXT_PUBLIC_API_BASE_URL` to the VPS API URL.
 7. Configure Cloudinary for image storage.
 8. Seed an admin user and test one MRI upload.
+9. Test both workflow modes in the frontend:
+   - core mode
+   - full workflow
 
 ## Notes
 
 - The local setup still works on your machine with the four ONNX files in `artifacts/models/`.
 - The hosted setup is designed for production-style uptime.
 - The app remains decision support software, not an autonomous diagnostic tool.
-
+- Core mode is the default.
+- Full workflow is optional and available when selected in the frontend.

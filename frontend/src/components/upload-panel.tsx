@@ -2,16 +2,20 @@
 
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { FileImage, LoaderCircle, LockKeyhole, Upload } from "lucide-react";
+import { CircleDashed, FileImage, LoaderCircle, LockKeyhole, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { uploadMriStream } from "@/lib/api";
 import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
+import { cn } from "@/lib/utils";
+import { WorkflowRunMode } from "@/lib/workflow";
 
 type UploadPanelProps = {
   onResult: (result: AnalysisResponse) => void;
   onUploadingChange: (isUploading: boolean) => void;
+  workflowMode: WorkflowRunMode;
+  onWorkflowModeChange: (mode: WorkflowRunMode) => void;
   previewUrl: string | null;
   onPreviewChange: (previewUrl: string | null) => void;
   onWorkflowReset: () => void;
@@ -23,6 +27,8 @@ type UploadPanelProps = {
 export function UploadPanel({
   onResult,
   onUploadingChange,
+  workflowMode,
+  onWorkflowModeChange,
   previewUrl,
   onPreviewChange,
   onWorkflowReset,
@@ -69,11 +75,15 @@ export function UploadPanel({
     onUploadingChange(true);
     const startTime = Date.now();
     try {
-      const result = await uploadMriStream(file, {
-        onStage: (agent) => onStageChange(agent),
-        onTrace: (trace) => onTraceUpdate(trace),
-        onModelVotes: (votes) => onModelVotesUpdate(votes),
-      });
+      const result = await uploadMriStream(
+        file,
+        {
+          onStage: (agent) => onStageChange(agent),
+          onTrace: (trace) => onTraceUpdate(trace),
+          onModelVotes: (votes) => onModelVotesUpdate(votes),
+        },
+        workflowMode
+      );
       onResult(result);
     } catch (uploadError) {
       setError(uploadError instanceof Error ? uploadError.message : "Upload failed");
@@ -92,9 +102,45 @@ export function UploadPanel({
     <Card>
       <CardHeader className="border-b border-border">
         <CardTitle>Upload scan</CardTitle>
-        <CardDescription>Upload one brain MRI image and start analysis.</CardDescription>
+        <CardDescription>Upload one brain MRI image and choose core mode or the full workflow.</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-5 p-6">
+        <div className="rounded-md border border-border bg-secondary p-3">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-sky-200/68">
+            <CircleDashed className="h-4 w-4 text-sky-300" />
+            Workflow mode
+          </div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <button
+              type="button"
+              onClick={() => onWorkflowModeChange("core")}
+              className={cn(
+                "rounded-md border px-4 py-3 text-left transition",
+                workflowMode === "core"
+                  ? "border-sky-400/35 bg-[rgba(17,39,51,0.7)] text-white"
+                  : "border-border bg-card text-slate-300 hover:border-sky-400/22 hover:bg-[rgba(12,22,35,0.92)]"
+              )}
+            >
+              <p className="text-sm font-semibold text-inherit">Core mode</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">Runs image prep, four model votes, and the final result.</p>
+            </button>
+            <button
+              type="button"
+              onClick={() => onWorkflowModeChange("full")}
+              className={cn(
+                "rounded-md border px-4 py-3 text-left transition",
+                workflowMode === "full"
+                  ? "border-sky-400/35 bg-[rgba(17,39,51,0.7)] text-white"
+                  : "border-border bg-card text-slate-300 hover:border-sky-400/22 hover:bg-[rgba(12,22,35,0.92)]"
+              )}
+            >
+              <p className="text-sm font-semibold text-inherit">Full workflow</p>
+              <p className="mt-1 text-xs leading-5 text-slate-400">Adds source lookup, report writing, checks, and case saving.</p>
+            </button>
+          </div>
+          <p className="mt-3 text-xs leading-5 text-slate-400">Selected route: {workflowMode === "full" ? "full workflow" : "core mode"}.</p>
+        </div>
+
         <form action={handleSubmit} className="space-y-4">
           <label className="group relative flex cursor-pointer flex-col items-center justify-center overflow-hidden rounded-lg border border-dashed border-border bg-secondary px-6 py-10 text-center transition hover:border-sky-400/22 hover:bg-[rgba(17,28,41,0.98)]">
             {isUploading ? <div className="scan-loader pointer-events-none absolute inset-0" /> : null}

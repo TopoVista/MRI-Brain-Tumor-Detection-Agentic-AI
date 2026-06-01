@@ -7,6 +7,7 @@ import { ReportPanel } from "@/components/report-panel";
 import { UploadPanel } from "@/components/upload-panel";
 import { WorkflowGraph } from "@/components/workflow-graph";
 import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
+import { WorkflowRunMode } from "@/lib/workflow";
 
 export function DashboardClient() {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
@@ -15,6 +16,7 @@ export function DashboardClient() {
   const [liveTrace, setLiveTrace] = useState<AgentTrace[]>([]);
   const [activeAgent, setActiveAgent] = useState<string | null>(null);
   const [liveModelVotes, setLiveModelVotes] = useState<ModelVote[]>([]);
+  const [workflowMode, setWorkflowMode] = useState<WorkflowRunMode>("core");
 
   function handleResult(next: AnalysisResponse) {
     setResult(next);
@@ -39,19 +41,27 @@ export function DashboardClient() {
       <section className="grid gap-5 xl:grid-cols-[minmax(360px,27vw)_minmax(0,1fr)] xl:items-start">
         <div className="grid gap-6 xl:sticky xl:top-6">
           <UploadPanel
-            onResult={handleResult}
-            onUploadingChange={setIsUploading}
-            previewUrl={previewUrl}
-            onPreviewChange={setPreviewUrl}
-            onWorkflowReset={resetWorkflowState}
-            onStageChange={setActiveAgent}
-            onTraceUpdate={appendTrace}
+          onResult={handleResult}
+          onUploadingChange={setIsUploading}
+          workflowMode={workflowMode}
+          onWorkflowModeChange={setWorkflowMode}
+          previewUrl={previewUrl}
+          onPreviewChange={setPreviewUrl}
+          onWorkflowReset={resetWorkflowState}
+          onStageChange={setActiveAgent}
+          onTraceUpdate={appendTrace}
             onModelVotesUpdate={setLiveModelVotes}
           />
         </div>
 
         <div className="grid gap-6">
-          <WorkflowGraph result={result} isUploading={isUploading} activeAgent={activeAgent} liveTrace={liveTrace} />
+          <WorkflowGraph
+            result={result}
+            isUploading={isUploading}
+            activeAgent={activeAgent}
+            liveTrace={liveTrace}
+            requestedMode={workflowMode}
+          />
         </div>
       </section>
       <ReportPanel
@@ -61,6 +71,7 @@ export function DashboardClient() {
         activeAgent={activeAgent}
         liveTrace={liveTrace}
         liveModelVotes={liveModelVotes}
+        requestedMode={workflowMode}
       />
     </main>
   );

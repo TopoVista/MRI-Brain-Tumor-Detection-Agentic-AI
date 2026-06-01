@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { AgentTrace, AnalysisResponse, ModelVote } from "@/lib/types";
-import { getStageLabel, resolveWorkflowMode } from "@/lib/workflow";
+import { getStageLabel, resolveWorkflowMode, WorkflowRunMode, workflowRunModeToWorkflowMode } from "@/lib/workflow";
 
 function predictionTone(prediction: AnalysisResponse["prediction"]) {
   if (prediction === "notumor") return "border-emerald-500/30 bg-emerald-950/35 text-emerald-200";
@@ -25,7 +25,7 @@ function workflowModeTone(result: AnalysisResponse) {
 }
 
 function workflowModeLabel(result: AnalysisResponse) {
-  return result.workflow_mode === "extended_support" ? (result.verified ? "Checked" : "Needs review") : "Core mode";
+  return result.workflow_mode === "extended_support" ? "Full workflow" : "Core mode";
 }
 
 function formatPrediction(prediction: AnalysisResponse["prediction"]) {
@@ -68,9 +68,9 @@ function normalizeVerifierNotes(notes: string[] | undefined, workflowMode: Analy
   if (cleaned.length) return cleaned;
   return workflowMode === "paper_core"
     ? [
-        "Core mode does not run the extra checks by default.",
+        "Core mode does not run the extra steps by default.",
         "This result comes directly from image prep, the four model votes, and the final combination step.",
-        "If you need source lookup and extra checks, use the full workflow.",
+        "If you need source lookup, case saving, and extra checks, use the full workflow.",
       ]
     : ["No check notes were returned for this run."];
 }
@@ -117,13 +117,15 @@ function LoadingCard({
   activeAgent,
   liveTrace,
   liveModelVotes,
+  requestedMode,
 }: {
   previewUrl: string | null;
   activeAgent: string | null;
   liveTrace: AgentTrace[];
   liveModelVotes: ModelVote[];
+  requestedMode: WorkflowRunMode;
 }) {
-  const workflowMode = resolveWorkflowMode(undefined, liveTrace);
+  const workflowMode = resolveWorkflowMode(workflowRunModeToWorkflowMode(requestedMode), liveTrace);
   const totalStages = workflowMode === "extended_support" ? 11 : 7;
   const progressValue = Math.min((liveTrace.length / totalStages) * 100, 98);
   const currentStage = getStageLabel(activeAgent);
@@ -203,6 +205,7 @@ export function ReportPanel({
   activeAgent,
   liveTrace,
   liveModelVotes,
+  requestedMode,
 }: {
   result: AnalysisResponse | null;
   isUploading: boolean;
@@ -210,9 +213,18 @@ export function ReportPanel({
   activeAgent: string | null;
   liveTrace: AgentTrace[];
   liveModelVotes: ModelVote[];
+  requestedMode: WorkflowRunMode;
 }) {
   if (isUploading) {
-    return <LoadingCard previewUrl={previewUrl} activeAgent={activeAgent} liveTrace={liveTrace} liveModelVotes={liveModelVotes} />;
+    return (
+      <LoadingCard
+        previewUrl={previewUrl}
+        activeAgent={activeAgent}
+        liveTrace={liveTrace}
+        liveModelVotes={liveModelVotes}
+        requestedMode={requestedMode}
+      />
+    );
   }
 
   if (!result) {

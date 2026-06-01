@@ -1,6 +1,10 @@
 # Brain MRI Tumor Classification and Analysis System
 
-A full-stack brain MRI application that uploads one scan, runs four model votes, combines the result, and shows a plain summary with the main details in one place.
+A full-stack brain MRI app that uploads one scan, runs model-based classification, and shows a clear result with the main details in one place.
+
+The project has two workflow types:
+- `Core mode`: upload, preprocess, run the four model votes, and combine the result
+- `Full workflow`: core mode plus source lookup, report text, checks, and case saving
 
 The project is built for two use cases:
 - `Local mode`: run everything on your machine with the ONNX models in `artifacts/models/`
@@ -17,7 +21,11 @@ The project is built for two use cases:
   - Inception V3
 - combines those votes into one final class
 - shows the result with confidence, class probabilities, and a plain summary
-- can also show extra steps such as source lookup, report text, checks, and case history
+- optionally runs extra support steps in the full workflow:
+  - source lookup
+  - report generation
+  - result checks
+  - case history saving
 
 The predicted classes are:
 
@@ -25,6 +33,22 @@ The predicted classes are:
 - `meningioma`
 - `notumor`
 - `pituitary`
+
+## Workflow Types
+
+```mermaid
+flowchart TD
+  A[Core mode] --> B[Upload]
+  B --> C[Preprocess]
+  C --> D[Four model votes]
+  D --> E[Combine result]
+  E --> F[Plain summary]
+  G[Full workflow] --> B
+  E --> H[Source lookup]
+  H --> I[Report text]
+  I --> J[Checks]
+  J --> K[Case saving]
+```
 
 ## Architecture
 
@@ -53,11 +77,12 @@ sequenceDiagram
   participant M as Model votes
 
   U->>F: Upload MRI image
-  F->>B: Send file to analysis endpoint
+  F->>B: Send file to core or full workflow endpoint
   B->>B: Store image and preprocess it
   B->>M: Run CNN, ResNet-50, VGG16, Inception V3
   M->>B: Return model votes and confidence
   B->>B: Combine votes into one result
+  B->>B: Optionally run full workflow steps
   B->>F: Stream progress and final response
   F->>U: Show result and details
 ```
@@ -137,6 +162,7 @@ flowchart TD
 - Local development is designed to use the four real models.
 - Hosted deployments can still run without the model files, which keeps the upload and result flow usable.
 - If the model files are present, the UI shows the real model votes.
+- The full workflow is optional and can be switched on in the UI when you need the extra support steps.
 
 ## UI Features
 
@@ -146,7 +172,7 @@ The frontend shows:
 - result summary
 - model votes
 - image signals
-- optional sources and checks
+- optional sources and checks in full workflow
 - case-level details
 
 More details:
@@ -186,4 +212,3 @@ The trained ONNX files are expected in `artifacts/models/`:
 - [Deployment guide](docs/deployment.md)
 - [Dataset notes](datasets/README.md)
 - [Frontend notes](frontend/README.md)
-

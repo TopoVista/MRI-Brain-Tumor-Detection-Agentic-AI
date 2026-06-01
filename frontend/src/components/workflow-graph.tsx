@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { AgentTrace, AnalysisResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { getWorkflowNodes, resolveWorkflowMode, WorkflowNode } from "@/lib/workflow";
+import { getWorkflowNodes, resolveWorkflowMode, WorkflowNode, WorkflowRunMode, workflowRunModeToWorkflowMode } from "@/lib/workflow";
 
 function traceStatus(traces: AgentTrace[], id: string) {
   const entry = traces.find((trace) => trace.agent === id);
@@ -142,14 +142,16 @@ export function WorkflowGraph({
   isUploading,
   activeAgent,
   liveTrace,
+  requestedMode,
 }: {
   result: AnalysisResponse | null;
   isUploading: boolean;
   activeAgent: string | null;
   liveTrace: AgentTrace[];
+  requestedMode: WorkflowRunMode;
 }) {
   const traces = result?.agent_trace?.length ? result.agent_trace : liveTrace;
-  const workflowMode = resolveWorkflowMode(result?.workflow_mode, traces);
+  const workflowMode = resolveWorkflowMode(result?.workflow_mode ?? workflowRunModeToWorkflowMode(requestedMode), traces);
   const nodes = getWorkflowNodes(workflowMode, traces);
   const rows = buildRows(nodes);
   const sequenceIndex = buildSequenceIndex(nodes);

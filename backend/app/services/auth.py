@@ -8,7 +8,7 @@ from app.memory.database import UserRecord, get_session
 
 
 settings = get_settings()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["bcrypt_sha256", "bcrypt"], deprecated="auto")
 
 
 def authenticate_user(username: str, password: str) -> bool:

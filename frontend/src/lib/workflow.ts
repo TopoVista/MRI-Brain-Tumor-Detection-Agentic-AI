@@ -1,6 +1,7 @@
 import { AgentTrace } from "@/lib/types";
 
 export type WorkflowMode = "paper_core" | "extended_support";
+export type WorkflowRunMode = "core" | "full";
 
 export type WorkflowNodeId =
   | "storage"
@@ -69,4 +70,8 @@ export function getWorkflowNodes(mode?: WorkflowMode | null, traces: AgentTrace[
   const resolvedMode = resolveWorkflowMode(mode, traces);
   const ids = resolvedMode === "extended_support" ? EXTENDED_WORKFLOW : PAPER_CORE_WORKFLOW;
   return ids.map((id) => WORKFLOW_NODES[id]);
+}
+
+export function workflowRunModeToWorkflowMode(mode: WorkflowRunMode): WorkflowMode {
+  return mode === "full" ? "extended_support" : "paper_core";
 }
