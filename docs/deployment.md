@@ -1,14 +1,14 @@
 # Production Deployment Guide
 
-This guide describes the production architecture for the project:
+This is the production-oriented deployment setup for the project:
 
 - `Frontend` on Vercel
 - `Backend` on a small VPS
 - `Model files` on Hugging Face
 - `Image uploads` on Cloudinary
-- `Database` on SQLite stored on the VPS
+- `Case history` in SQLite on the backend host
 
-The goal is to keep the system affordable, always available, and still light enough to run on CPU.
+The goal is to keep the system affordable, always available, and still CPU-friendly.
 
 ## Architecture
 
@@ -31,7 +31,7 @@ flowchart TD
 ## What This Setup Does
 
 - keeps the frontend fast on Vercel
-- keeps the backend always on, instead of sleeping on a free tier
+- keeps the backend always on
 - stores MRI uploads outside the VPS disk when Cloudinary is enabled
 - loads the four ONNX models from a public Hugging Face repo
 - keeps the result flow simple:
@@ -194,17 +194,9 @@ CLOUDINARY_API_KEY=<api-key>
 CLOUDINARY_API_SECRET=<api-secret>
 ```
 
-If Cloudinary is not configured, the backend falls back to local disk storage in development.
-
 ## 5. Auth hardening
 
-The backend no longer depends on hardcoded login values.
-
-Instead:
-
-- users are stored in SQLite
-- passwords are hashed with `passlib` + `bcrypt`
-- the first admin account is seeded from environment variables
+The backend uses SQLite-backed users and hashed passwords.
 
 Recommended production values:
 
@@ -241,10 +233,11 @@ Approximate monthly cost:
 5. Deploy the frontend to Vercel.
 6. Set `NEXT_PUBLIC_API_BASE_URL` to the VPS API URL.
 7. Configure Cloudinary for image storage.
-8. Log in with the seeded admin account and test one MRI upload.
+8. Seed an admin user and test one MRI upload.
 
 ## Notes
 
 - The local setup still works on your machine with the four ONNX files in `artifacts/models/`.
 - The hosted setup is designed for production-style uptime.
 - The app remains decision support software, not an autonomous diagnostic tool.
+

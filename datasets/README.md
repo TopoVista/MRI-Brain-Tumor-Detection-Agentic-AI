@@ -1,6 +1,6 @@
 # Dataset
 
-This folder contains the local brain MRI dataset used for experimentation and model training.
+This folder contains the local brain MRI dataset used for training and experimentation.
 
 ## Structure
 
@@ -55,3 +55,4 @@ datasets/
 - Keep the raw dataset folders clean.
 - Put any preprocessing helpers or training notes in `scripts/` or `docs/`.
 - The class list here matches the four classes used by the app.
+

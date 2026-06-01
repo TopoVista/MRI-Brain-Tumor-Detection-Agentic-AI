@@ -33,11 +33,11 @@ flowchart TD
 
 - uses the four local ONNX files in `artifacts/models/`
 - is meant for development on your machine
-- should use the real model path when the files are present
+- uses the real model path when the files are present
 
 ### Hosted Mode
 
-- runs on Vercel and Render
+- runs on Vercel and a VPS or Render-style backend
 - can still work if the model files are missing
 - falls back safely instead of breaking the upload flow
 
@@ -52,4 +52,4 @@ flowchart TD
 
 - The main path stays focused on upload, preprocess, vote, and combine.
 - Extra steps are available, but they are not required for the basic flow.
-- The UI and API are meant to stay simple enough for local use and hosted use.
+- The UI and API are meant to stay simple enough for local development and hosted use.

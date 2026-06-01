@@ -1,14 +1,14 @@
 # Frontend
 
-This is the Next.js interface for the brain MRI tumor classification system.
+This is the Next.js UI for the brain MRI tumor classification and analysis system.
 
-It is designed to do four simple things:
+It keeps the interface simple:
 - upload one MRI image
-- show the current workflow step
+- show the current step
 - show the result clearly
 - keep the extra details available when needed
 
-## What You See
+## What The UI Shows
 
 - upload card
 - live step tracker
@@ -47,7 +47,7 @@ flowchart LR
 
 ## Notes
 
-- The frontend expects the backend to be running on port `8000` during local development.
-- The wording in the UI is intentionally plain and direct.
-- The layout is meant to be clear and readable, not flashy.
+- The frontend expects the backend to be running on port `8000` in local development.
+- The text in the UI is intentionally direct and easy to read.
+- The layout is designed for clarity, not decoration.
 
