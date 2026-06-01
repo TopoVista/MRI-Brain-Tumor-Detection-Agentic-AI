@@ -52,5 +52,4 @@ flowchart TD
 
 - The main path stays focused on upload, preprocess, vote, and combine.
 - Extra steps are available, but they are not required for the basic flow.
-- The UI and API are meant to stay simple enough for local use and demo use.
-
+- The UI and API are meant to stay simple enough for local use and hosted use.

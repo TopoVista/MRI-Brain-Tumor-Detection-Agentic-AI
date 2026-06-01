@@ -42,8 +42,9 @@ class Settings(BaseSettings):
     cloudinary_cloud_name: str = Field(default="", alias="CLOUDINARY_CLOUD_NAME")
     cloudinary_api_key: str = Field(default="", alias="CLOUDINARY_API_KEY")
     cloudinary_api_secret: str = Field(default="", alias="CLOUDINARY_API_SECRET")
-    demo_username: str = Field(default="admin", alias="DEMO_USERNAME")
-    demo_password: str = Field(default="admin123", alias="DEMO_PASSWORD")
+    admin_username: str = Field(default="admin", alias="ADMIN_USERNAME")
+    admin_password: str = Field(default="", alias="ADMIN_PASSWORD")
+    admin_password_hash: str = Field(default="", alias="ADMIN_PASSWORD_HASH")
 
     @property
     def sqlite_url(self) -> str:

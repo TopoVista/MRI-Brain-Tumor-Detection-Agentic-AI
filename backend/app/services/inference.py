@@ -149,7 +149,7 @@ class MultiModelInferenceService:
             probabilities={label: float(probabilities[index]) for index, label in enumerate(MODEL_LABELS)},
             mode="heuristic",
             explanation=(
-                f"{MODEL_AGENT_SPECS[agent]['display_name']} is running in demo mode because no ONNX "
+                f"{MODEL_AGENT_SPECS[agent]['display_name']} is running in fallback mode because no ONNX "
                 "weights are configured for this model agent."
             ),
         )

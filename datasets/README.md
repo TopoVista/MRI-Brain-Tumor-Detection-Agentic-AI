@@ -43,7 +43,7 @@ datasets/
 ## Purpose
 
 - `Training/` is used for model training and experimentation.
-- `Testing/` is used for evaluation and demo checks.
+- `Testing/` is used for evaluation and validation checks.
 - The app does not read this folder at runtime unless you are retraining.
 
 ## Source
@@ -55,4 +55,3 @@ datasets/
 - Keep the raw dataset folders clean.
 - Put any preprocessing helpers or training notes in `scripts/` or `docs/`.
 - The class list here matches the four classes used by the app.
-

@@ -93,7 +93,7 @@ flowchart TD
 ```
 
 - Local development is set up to use the four real models.
-- Hosted deployments can still work without the model files, which keeps the app usable for a demo.
+- Hosted deployments can still work without the model files, which keeps the app usable in fallback mode.
 - If the model files are present, the same UI shows the real model votes.
 
 ## Frontend
@@ -138,4 +138,3 @@ The trained ONNX files are expected in `artifacts/models/`:
 - The backend stores uploads locally in development.
 - Cloudinary can be used for remote upload storage if configured.
 - The optional extra workflow steps are still available, but the main path stays focused on upload, preprocess, vote, and combine.
-
