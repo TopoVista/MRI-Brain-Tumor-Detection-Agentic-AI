@@ -53,25 +53,130 @@ def _generate_with_openai(
         model_votes=model_votes,
     )
 
+    # Use standard chat.completions.create as it is the most stable and widely supported endpoint
+    models_to_try = [settings.openai_model, "gpt-4o-mini", "gpt-4o"]
+    for model in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Generate a grounded medical support report and avoid unsupported claims.",
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                temperature=0.2,
+            )
+            text = response.choices[0].message.content
+            if text:
+                return text.strip()
+        except Exception as exc:
+            logger.warning("OpenAI generation failed with model %s: %s", model, exc)
+
+    return None
+
+
+def _generate_with_gemini(
+    prediction: str,
+    confidence: float,
+    features: dict,
+    citations: list[dict],
+    model_votes: list[dict],
+) -> str | None:
+    if settings.llm_provider != "gemini" or not settings.gemini_api_key:
+        return None
+
+    import httpx
+
+    prompt = _build_prompt(
+        prediction=prediction,
+        confidence=confidence,
+        features=features,
+        citations=citations,
+        model_votes=model_votes,
+    )
+
+    # We support gemini-2.5-flash or gemini-1.5-flash
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.gemini_api_key}"
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": "You are a grounded medical support AI assistant. Generate a grounded medical support report and avoid unsupported claims.\n\n" + prompt}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "temperature": 0.2,
+        }
+    }
+
     try:
-        response = client.responses.create(
-            model=settings.openai_model,
-            input=[
-                {
-                    "role": "system",
-                    "content": "Generate a grounded medical support report and avoid unsupported claims.",
-                },
-                {
-                    "role": "user",
-                    "content": prompt,
-                },
-            ],
-        )
-        text = getattr(response, "output_text", None)
-        if text:
-            return text.strip()
+        response = httpx.post(url, json=payload, timeout=15.0)
+        if response.status_code == 200:
+            data = response.json()
+            text = data["candidates"][0]["content"]["parts"][0]["text"]
+            if text:
+                return text.strip()
+        else:
+            logger.warning("Gemini API returned status code %d: %s", response.status_code, response.text)
     except Exception as exc:
-        logger.warning("OpenAI report generation failed, using local fallback: %s", exc)
+        logger.warning("Gemini report generation failed: %s", exc)
+
+    return None
+
+
+def _generate_with_groq(
+    prediction: str,
+    confidence: float,
+    features: dict,
+    citations: list[dict],
+    model_votes: list[dict],
+) -> str | None:
+    if settings.llm_provider != "groq" or not settings.groq_api_key:
+        return None
+
+    from openai import OpenAI
+
+    # Groq exposes an OpenAI-compatible endpoint
+    client = OpenAI(
+        base_url="https://api.groq.com/openai/v1",
+        api_key=settings.groq_api_key,
+    )
+    prompt = _build_prompt(
+        prediction=prediction,
+        confidence=confidence,
+        features=features,
+        citations=citations,
+        model_votes=model_votes,
+    )
+
+    models_to_try = ["mixtral-8x7b-32768", "llama3-8b-8192", "gemma2-9b-it"]
+    for model in models_to_try:
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Generate a grounded medical support report and avoid unsupported claims.",
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt,
+                    },
+                ],
+                temperature=0.2,
+            )
+            text = response.choices[0].message.content
+            if text:
+                return text.strip()
+        except Exception as exc:
+            logger.warning("Groq generation failed with model %s: %s", model, exc)
 
     return None
 
@@ -83,6 +188,7 @@ def generate_grounded_report(
     citations: list[dict],
     model_votes: list[dict],
 ) -> str:
+    # 1. Try OpenAI if configured
     openai_report = _generate_with_openai(
         prediction=prediction,
         confidence=confidence,
@@ -93,6 +199,29 @@ def generate_grounded_report(
     if openai_report:
         return openai_report
 
+    # 2. Try Gemini if configured
+    gemini_report = _generate_with_gemini(
+        prediction=prediction,
+        confidence=confidence,
+        features=features,
+        citations=citations,
+        model_votes=model_votes,
+    )
+    if gemini_report:
+        return gemini_report
+
+    # 3. Try Groq if configured
+    groq_report = _generate_with_groq(
+        prediction=prediction,
+        confidence=confidence,
+        features=features,
+        citations=citations,
+        model_votes=model_votes,
+    )
+    if groq_report:
+        return groq_report
+
+    # 4. Fallback to local report generator if no API is available/configured
     literature_line = " ".join(
         f"{item['title']} notes {item['summary']}" for item in citations[:2]
     )
@@ -100,10 +229,6 @@ def generate_grounded_report(
         "The system recommends urgent specialist review."
         if confidence >= settings.mri_confidence_threshold
         else "The system recommends correlation with radiologist review and clinical context."
-    )
-    vote_summary = "; ".join(
-        f"{vote['agent'].replace('_', ' ')} voted {vote['prediction']} ({vote['confidence']:.0%})"
-        for vote in model_votes
     )
     return "\n".join(
         [
