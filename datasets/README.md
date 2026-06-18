@@ -51,7 +51,7 @@ datasets/
 
 ## Source
 
-- Imported locally from `C:\Users\KIIT0001\Desktop\marksheets\archive`
+- Imported locally from `<local project root folder destination>`
 
 ## Notes
 
